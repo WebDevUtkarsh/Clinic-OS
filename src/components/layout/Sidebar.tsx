@@ -112,6 +112,11 @@ export function Sidebar({ facilityId, facilities, session }: SidebarProps) {
   );
   const roleBadgeClasses = getRoleBadgeClasses(session.role);
   const roleInitial = session.role.slice(0, 1).toUpperCase();
+  const scrollZone = !canScrollUp
+    ? "top"
+    : !canScrollDown
+      ? "bottom"
+      : "middle";
 
   useEffect(() => {
     const element = navScrollRef.current;
@@ -276,11 +281,16 @@ export function Sidebar({ facilityId, facilities, session }: SidebarProps) {
         ) : null}
       </div>
 
-      <div className="mt-8 min-h-0 flex-1">
+      <div
+        className={cn(
+          "mt-8 min-h-0 flex-1",
+          isSidebarCollapsed ? "flex" : "grid grid-cols-[minmax(0,1fr)_28px] gap-3",
+        )}
+      >
         <div
           className={cn(
             "flex h-full min-h-0 flex-col",
-            isSidebarCollapsed && "items-center",
+            isSidebarCollapsed && "w-full items-center",
           )}
         >
           <button
@@ -288,10 +298,13 @@ export function Sidebar({ facilityId, facilities, session }: SidebarProps) {
             onClick={() => scrollNavigation("up")}
             disabled={!canScrollUp}
             className={cn(
-              "mb-3 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-gray-500 transition-all dark:border-white/6 dark:bg-[#111827] dark:text-[#6B7280]",
+              "inline-flex shrink-0 items-center justify-center border border-gray-200 bg-gray-50 text-gray-500 transition-all dark:border-white/6 dark:bg-[#111827] dark:text-[#6B7280]",
+              isSidebarCollapsed
+                ? "mb-3 h-8 w-8 rounded-2xl"
+                : "hidden",
               canScrollUp
                 ? "hover:border-blue-500/20 hover:text-blue-500 dark:hover:text-[#9CA3AF]"
-                : "cursor-default opacity-40",
+                : "cursor-default opacity-35",
             )}
             aria-label="Scroll navigation up"
           >
@@ -358,16 +371,67 @@ export function Sidebar({ facilityId, facilities, session }: SidebarProps) {
             onClick={() => scrollNavigation("down")}
             disabled={!canScrollDown}
             className={cn(
-              "mt-3 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-gray-500 transition-all dark:border-white/6 dark:bg-[#111827] dark:text-[#6B7280]",
+              "inline-flex shrink-0 items-center justify-center border border-gray-200 bg-gray-50 text-gray-500 transition-all dark:border-white/6 dark:bg-[#111827] dark:text-[#6B7280]",
+              isSidebarCollapsed
+                ? "mt-3 h-8 w-8 rounded-2xl"
+                : "hidden",
               canScrollDown
                 ? "hover:border-blue-500/20 hover:text-blue-500 dark:hover:text-[#9CA3AF]"
-                : "cursor-default opacity-40",
+                : "cursor-default opacity-35",
             )}
             aria-label="Scroll navigation down"
           >
             <ChevronDown className="h-4 w-4" />
           </button>
         </div>
+
+        {!isSidebarCollapsed ? (
+          <div className="pointer-events-none flex h-full min-h-0 flex-col items-center py-1">
+            <button
+              type="button"
+              onClick={() => scrollNavigation("up")}
+              disabled={!canScrollUp}
+              className={cn(
+                "pointer-events-auto inline-flex h-7 w-7 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-gray-500 transition-all dark:border-white/6 dark:bg-[#111827] dark:text-[#6B7280]",
+                canScrollUp
+                  ? "hover:border-blue-500/20 hover:text-blue-500 dark:hover:text-[#9CA3AF]"
+                  : "cursor-default opacity-35",
+              )}
+              aria-label="Scroll navigation up"
+            >
+              <ChevronUp className="h-3.5 w-3.5" />
+            </button>
+
+            <div className="relative my-3 flex-1 w-px rounded-full bg-gray-200/80 dark:bg-white/8">
+              <div className="absolute -inset-x-1 inset-y-0 rounded-full bg-linear-to-b from-blue-500/0 via-blue-500/5 to-blue-500/0" />
+              <span
+                className={cn(
+                  "absolute left-1/2 h-3.5 w-3.5 -translate-x-1/2 rounded-full border border-blue-500/25 bg-blue-500 shadow-[0_0_18px_rgba(59,130,246,0.22)] transition-all duration-200",
+                  scrollZone === "top"
+                    ? "top-0"
+                    : scrollZone === "middle"
+                      ? "top-1/2 -translate-y-1/2"
+                      : "bottom-0",
+                )}
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={() => scrollNavigation("down")}
+              disabled={!canScrollDown}
+              className={cn(
+                "pointer-events-auto inline-flex h-7 w-7 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-gray-500 transition-all dark:border-white/6 dark:bg-[#111827] dark:text-[#6B7280]",
+                canScrollDown
+                  ? "hover:border-blue-500/20 hover:text-blue-500 dark:hover:text-[#9CA3AF]"
+                  : "cursor-default opacity-35",
+              )}
+              aria-label="Scroll navigation down"
+            >
+              <ChevronDown className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ) : null}
       </div>
 
       <div
@@ -381,7 +445,7 @@ export function Sidebar({ facilityId, facilities, session }: SidebarProps) {
             "flex items-center rounded-2xl border border-gray-200 bg-gray-50 dark:border-white/6 dark:bg-[#111827]",
             isSidebarCollapsed
               ? "h-11 justify-center px-0"
-              : "justify-between px-3 py-3",
+              : "justify-between px-3 py-2.5",
           )}
         >
           <span
@@ -402,28 +466,39 @@ export function Sidebar({ facilityId, facilities, session }: SidebarProps) {
         <div
           className={cn(
             "flex items-center rounded-2xl border border-gray-200 bg-gray-50 dark:border-white/6 dark:bg-[#111827]",
-            isSidebarCollapsed ? "h-12 justify-center px-0" : "h-14 gap-3 px-3",
+            isSidebarCollapsed ? "h-12 justify-center px-0" : "gap-3 px-3 py-3",
           )}
+          title={isSidebarCollapsed ? session.user.name : undefined}
         >
           <div
             className={cn(
               "flex shrink-0 items-center justify-center bg-blue-500/15 font-semibold text-blue-500",
               isSidebarCollapsed
                 ? "h-10 w-10 rounded-2xl text-sm"
-                : "h-11 w-11 rounded-full text-[15px]",
+                : "h-11 w-11 rounded-2xl text-[15px]",
             )}
           >
             {initials}
           </div>
           {!isSidebarCollapsed ? (
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-[14px] font-semibold leading-none text-gray-900 dark:text-[#F9FAFB]">
-                {session.user.name}
+            <>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-[14px] font-semibold leading-none text-gray-900 dark:text-[#F9FAFB]">
+                  {session.user.name}
+                </div>
+                <div className="mt-1 truncate text-[12px] text-gray-500 dark:text-[#6B7280]">
+                  {session.user.email}
+                </div>
               </div>
-              <div className="mt-1 truncate text-[11px] font-medium uppercase tracking-[0.08em] text-gray-500 dark:text-[#6B7280]">
+              <span
+                className={cn(
+                  "shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]",
+                  roleBadgeClasses,
+                )}
+              >
                 {session.role}
-              </div>
-            </div>
+              </span>
+            </>
           ) : null}
         </div>
 
