@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Area, AreaChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
 import { revenueSeries } from "@/constants/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useChartSize } from "@/components/dashboard/use-chart-size";
@@ -15,29 +8,6 @@ import { useChartSize } from "@/components/dashboard/use-chart-size";
 type RevenueChartProps = {
   loading: boolean;
 };
-
-function RevenueTooltip({
-  active,
-  payload,
-  label,
-}: {
-  active?: boolean;
-  payload?: Array<{ value?: number }>;
-  label?: string;
-}) {
-  if (!active || !payload?.length || typeof payload[0]?.value !== "number") {
-    return null;
-  }
-
-  return (
-    <div className="rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-xl dark:border-white/[0.08] dark:bg-[#111827]">
-      <div className="text-xs text-gray-500 dark:text-[#6B7280]">Day {label}</div>
-      <div className="mt-1 text-sm font-semibold text-gray-900 dark:text-[#F9FAFB]">
-        ${payload[0].value.toLocaleString()}
-      </div>
-    </div>
-  );
-}
 
 export function RevenueChart({ loading }: RevenueChartProps) {
   const { ref, width, height, ready } = useChartSize(220);
@@ -93,7 +63,19 @@ export function RevenueChart({ loading }: RevenueChartProps) {
               tick={{ fill: "var(--color-text-muted)", fontSize: 11 }}
               tickFormatter={(value) => `$${value / 1000}k`}
             />
-            <Tooltip content={<RevenueTooltip />} />
+            <Tooltip
+              formatter={(value) =>
+                typeof value === "number" ? [`$${value.toLocaleString()}`, "Revenue"] : [value, "Revenue"]
+              }
+              labelFormatter={(label) => `Day ${label}`}
+              contentStyle={{
+                backgroundColor: "#111827",
+                border: "1px solid rgba(255,255,255,0.08)",
+                borderRadius: "12px",
+              }}
+              itemStyle={{ color: "#F9FAFB" }}
+              labelStyle={{ color: "#9CA3AF" }}
+            />
             <Area
               type="monotone"
               dataKey="revenue"

@@ -56,12 +56,12 @@ export function Topbar({
   const roleBadgeClasses = getRoleBadgeClasses(session.role);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-gray-200 bg-gray-50/95 px-4 py-3 backdrop-blur xl:px-6 dark:border-white/6 dark:bg-[#0B0F14]/90">
+    <header className="sticky top-0 z-40 border-b border-gray-200 bg-gray-50/95 px-4 py-3 backdrop-blur xl:px-6 dark:border-white/[0.06] dark:bg-[#0B0F14]/90">
       <div className="flex min-h-14 items-center gap-3">
         <button
           type="button"
           onClick={() => setSidebarOpen(true)}
-          className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 lg:hidden dark:border-white/8 dark:bg-[#111827] dark:text-[#9CA3AF]"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 lg:hidden dark:border-white/[0.08] dark:bg-[#111827] dark:text-[#9CA3AF]"
           aria-label="Open sidebar"
         >
           <Menu className="h-4 w-4" />
@@ -82,7 +82,7 @@ export function Topbar({
         </div>
 
         <div className="hidden min-w-0 flex-1 justify-center lg:flex">
-          <label className="flex h-11 w-full max-w-xl items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 dark:border-white/8 dark:bg-[#1F2937]">
+          <label className="flex h-11 w-full max-w-xl items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 dark:border-white/[0.08] dark:bg-[#1F2937]">
             <Search className="h-4 w-4 text-gray-400 dark:text-[#6B7280]" />
             <input
               type="search"
@@ -90,7 +90,7 @@ export function Topbar({
               className="w-full bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400 dark:text-[#F9FAFB] dark:placeholder:text-[#6B7280]"
               aria-label="Search patients and appointments"
             />
-            <span className="rounded-full border border-gray-200 px-2 py-0.5 text-[11px] font-medium text-gray-400 dark:border-white/8:text-[#6B7280]">
+            <span className="rounded-full border border-gray-200 px-2 py-1 text-[11px] font-medium text-gray-400 dark:border-white/[0.08] dark:text-[#6B7280]">
               Ctrl K
             </span>
           </label>
@@ -101,7 +101,7 @@ export function Topbar({
             type="button"
             onClick={toggleInsightsOpen}
             className={cn(
-              "inline-flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition-colors hover:border-blue-500/20 hover:text-blue-500 dark:border-white/8 dark:bg-[#111827] dark:text-[#9CA3AF]",
+              "inline-flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition-colors hover:border-blue-500/20 hover:text-blue-500 dark:border-white/[0.08] dark:bg-[#111827] dark:text-[#9CA3AF]",
               isInsightsOpen && "border-blue-500/20 bg-blue-500/10 text-blue-500",
             )}
             aria-label="Toggle insights panel"
@@ -111,14 +111,14 @@ export function Topbar({
 
           <ThemeToggle
             variant="outline"
-            className="h-11 w-11 border-gray-200 bg-white text-gray-600 hover:text-blue-500 dark:border-white/8 dark:bg-[#111827] dark:text-[#9CA3AF]"
+            className="h-11 w-11 border-gray-200 bg-white text-gray-600 hover:text-blue-500 dark:border-white/[0.08] dark:bg-[#111827] dark:text-[#9CA3AF]"
           />
 
           <div className="relative">
             <button
               type="button"
               onClick={() => setNotificationsOpen((current) => !current)}
-              className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition-colors hover:border-blue-500/20 hover:text-blue-500 dark:border-white/8 dark:bg-[#111827] dark:text-[#9CA3AF]"
+              className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition-colors hover:border-blue-500/20 hover:text-blue-500 dark:border-white/[0.08] dark:bg-[#111827] dark:text-[#9CA3AF]"
               aria-label="Open notifications"
             >
               <Bell className="h-4 w-4" />
@@ -128,7 +128,7 @@ export function Topbar({
             </button>
 
             {notificationsOpen ? (
-              <div className="absolute right-0 top-[calc(100%+12px)] z-20 w-80 rounded-2xl border border-gray-200 bg-white p-2 shadow-2xl dark:border-white/8 dark:bg-[#111827]">
+              <div className="absolute right-0 top-[calc(100%+12px)] z-20 w-80 rounded-2xl border border-gray-200 bg-white p-2 shadow-2xl dark:border-white/[0.08] dark:bg-[#111827]">
                 <div className="flex items-center justify-between px-3 py-2">
                   <div>
                     <div className="text-sm font-semibold text-gray-900 dark:text-[#F9FAFB]">
@@ -141,7 +141,7 @@ export function Topbar({
                   <button
                     type="button"
                     onClick={() => setNotificationsOpen(false)}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-white/4"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-white/[0.04]"
                     aria-label="Close notifications"
                   >
                     <X className="h-4 w-4" />
@@ -151,7 +151,7 @@ export function Topbar({
                   {dashboardAlerts.slice(0, 3).map((alert) => (
                     <div
                       key={`${alert.type}-${alert.message}`}
-                      className="rounded-xl border border-gray-200 px-3 py-3 dark:border-white/6"
+                      className="rounded-2xl border border-gray-200 px-4 py-4 dark:border-white/[0.06]"
                     >
                       <div className="text-sm font-medium text-gray-900 dark:text-[#F9FAFB]">
                         {alert.message}
@@ -170,10 +170,10 @@ export function Topbar({
             <button
               type="button"
               onClick={() => setAccountMenuOpen((current) => !current)}
-              className="flex h-11 items-center gap-3 rounded-2xl border border-gray-200 bg-white px-3 text-left transition-colors hover:border-blue-500/20 dark:border-white/8 dark:bg-[#111827]"
+              className="flex h-11 items-center gap-3 rounded-2xl border border-gray-200 bg-white px-3 text-left transition-colors hover:border-blue-500/20 dark:border-white/[0.08] dark:bg-[#111827]"
               aria-label="Open account menu"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/15 text-sm font-semibold text-blue-500">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-500/15 text-sm font-semibold text-blue-500">
                 {initials}
               </div>
               <div className="hidden min-w-0 md:block">
@@ -188,7 +188,7 @@ export function Topbar({
             </button>
 
             {accountMenuOpen ? (
-              <div className="absolute right-0 top-[calc(100%+12px)] z-20 w-64 rounded-2xl border border-gray-200 bg-white p-2 shadow-2xl dark:border-white/8 dark:bg-[#111827]">
+              <div className="absolute right-0 top-[calc(100%+12px)] z-20 w-64 rounded-2xl border border-gray-200 bg-white p-2 shadow-2xl dark:border-white/[0.08] dark:bg-[#111827]">
                 <div className="px-3 py-2">
                   <div className="text-sm font-semibold text-gray-900 dark:text-[#F9FAFB]">
                     {session.user.name}
@@ -196,7 +196,7 @@ export function Topbar({
                   <div className="mt-1 flex items-center gap-2">
                     <span
                       className={cn(
-                        "rounded-full border px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.08em]",
+                        "rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em]",
                         roleBadgeClasses,
                       )}
                     >
@@ -210,7 +210,7 @@ export function Topbar({
                 <button
                   type="button"
                   onClick={() => setAccountMenuOpen(false)}
-                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-[#9CA3AF] dark:hover:bg-white/4 dark:hover:text-[#F9FAFB]"
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-[#9CA3AF] dark:hover:bg-white/[0.04] dark:hover:text-[#F9FAFB]"
                 >
                   <UserCircle2 className="h-4 w-4" />
                   Profile
@@ -218,7 +218,7 @@ export function Topbar({
                 <button
                   type="button"
                   onClick={() => setAccountMenuOpen(false)}
-                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-[#9CA3AF] dark:hover:bg-white/4 dark:hover:text-[#F9FAFB]"
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-[#9CA3AF] dark:hover:bg-white/[0.04] dark:hover:text-[#F9FAFB]"
                 >
                   <Repeat2 className="h-4 w-4" />
                   Switch Role

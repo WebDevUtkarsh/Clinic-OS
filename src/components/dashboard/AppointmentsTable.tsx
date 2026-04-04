@@ -64,44 +64,44 @@ export function AppointmentsTable({ loading }: AppointmentsTableProps) {
                   key={`${appointment.time}-${appointment.patient}`}
                   className="group border-b border-gray-200 transition-colors hover:bg-black/[0.02] dark:border-white/[0.04] dark:hover:bg-white/[0.02]"
                 >
-                  <td className="px-4 py-3.5 text-sm text-gray-900 dark:text-[#F9FAFB]">
+                  <td className="px-4 py-4 text-sm text-gray-900 dark:text-[#F9FAFB]">
                     {appointment.time}
                   </td>
-                  <td className="px-4 py-3.5 text-sm text-gray-900 dark:text-[#F9FAFB]">
+                  <td className="px-4 py-4 text-sm text-gray-900 dark:text-[#F9FAFB]">
                     {appointment.patient}
                   </td>
-                  <td className="px-4 py-3.5 text-sm text-gray-600 dark:text-[#9CA3AF]">
+                  <td className="px-4 py-4 text-sm text-gray-600 dark:text-[#9CA3AF]">
                     {appointment.doctor}
                   </td>
-                  <td className="px-4 py-3.5">
+                  <td className="px-4 py-4">
                     <span
                       className={cn(
-                        "rounded-full px-2.5 py-0.5 text-[11px] font-semibold",
+                        "rounded-full px-3 py-1 text-[11px] font-semibold",
                         statusClasses[appointment.status],
                       )}
                     >
                       {appointment.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3.5">
+                  <td className="px-4 py-4">
                     <div className="flex items-center gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
                       <button
                         type="button"
-                        className="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-black/[0.06] hover:text-gray-900 dark:text-[#9CA3AF] dark:hover:bg-white/[0.06] dark:hover:text-[#F9FAFB]"
+                        className="rounded-xl p-2 text-gray-500 transition-colors hover:bg-black/[0.06] hover:text-gray-900 dark:text-[#9CA3AF] dark:hover:bg-white/[0.06] dark:hover:text-[#F9FAFB]"
                         aria-label={`View ${appointment.patient}`}
                       >
                         <Eye className="h-4 w-4" />
                       </button>
                       <button
                         type="button"
-                        className="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-black/[0.06] hover:text-gray-900 dark:text-[#9CA3AF] dark:hover:bg-white/[0.06] dark:hover:text-[#F9FAFB]"
+                        className="rounded-xl p-2 text-gray-500 transition-colors hover:bg-black/[0.06] hover:text-gray-900 dark:text-[#9CA3AF] dark:hover:bg-white/[0.06] dark:hover:text-[#F9FAFB]"
                         aria-label={`Reschedule ${appointment.patient}`}
                       >
                         <CalendarDays className="h-4 w-4" />
                       </button>
                       <button
                         type="button"
-                        className="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-black/[0.06] hover:text-gray-900 dark:text-[#9CA3AF] dark:hover:bg-white/[0.06] dark:hover:text-[#F9FAFB]"
+                        className="rounded-xl p-2 text-gray-500 transition-colors hover:bg-black/[0.06] hover:text-gray-900 dark:text-[#9CA3AF] dark:hover:bg-white/[0.06] dark:hover:text-[#F9FAFB]"
                         aria-label={`Mark ${appointment.patient} complete`}
                       >
                         <Check className="h-4 w-4" />

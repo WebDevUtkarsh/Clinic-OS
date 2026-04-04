@@ -40,9 +40,9 @@ export function AlertsPanel({ loading }: AlertsPanelProps) {
           ? Array.from({ length: 5 }).map((_, index) => (
               <div
                 key={index}
-                className="flex items-center gap-3 rounded-xl border border-gray-200 px-4 py-4 dark:border-white/[0.06]"
+                className="flex items-center gap-3 rounded-2xl border border-gray-200 px-4 py-4 dark:border-white/[0.06]"
               >
-                <Skeleton className="h-10 w-10 rounded-xl bg-black/5 dark:bg-white/[0.06]" />
+                <Skeleton className="h-10 w-10 rounded-2xl bg-black/5 dark:bg-white/[0.06]" />
                 <div className="flex-1 space-y-2">
                   <Skeleton className="h-4 w-48 bg-black/5 dark:bg-white/[0.06]" />
                   <Skeleton className="h-3 w-24 bg-black/5 dark:bg-white/[0.06]" />
@@ -69,7 +69,7 @@ export function AlertsPanel({ loading }: AlertsPanelProps) {
                   />
                   <div
                     className={cn(
-                      "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-l-2",
+                      "flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border-l-2",
                       alertClasses[alert.tone],
                     )}
                   >

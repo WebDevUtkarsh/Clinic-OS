@@ -98,7 +98,7 @@ export function DashboardShell({
       <div
         className={cn(
           "min-h-screen transition-[padding-left] duration-300 ease-out",
-          isSidebarCollapsed ? "lg:pl-20" : "lg:pl-[296px]",
+          isSidebarCollapsed ? "lg:pl-12" : "lg:pl-[296px]",
         )}
       >
         <Topbar
