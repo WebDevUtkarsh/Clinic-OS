@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../../src/generated/control"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  name        String
+  password    String
+  phone       String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  memberships TenantMember[]
+
+  @@map("users")
+}
+
+model Tenant {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+
+  // 🔐 DB connection (encrypted in real system)
+  dbUrl       String?
+
+  status      TenantStatus @default(PROVISIONING)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members     TenantMember[]
+
+  @@map("tenants")
+}
+
+model TenantMember {
+  id        String @id @default(cuid())
+
+  userId    String
+  tenantId  String
+
+  role      TenantRole @default(OWNER)
+
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant    Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, tenantId])
+  @@map("tenant_members")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  tenantId  String?
+  action    String
+  metadata  Json?
+
+  createdAt DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+model AlertWebhook {
+  id        String @id @default(uuid())
+  tenantId  String
+  url       String
+  isActive  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+}

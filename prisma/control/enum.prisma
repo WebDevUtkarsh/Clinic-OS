@@ -1,0 +1,13 @@
+enum TenantStatus {
+  PROVISIONING
+  ONBOARDING
+  ACTIVE
+  FAILED
+}
+
+enum TenantRole {
+  OWNER
+  ADMIN
+  DOCTOR
+  STAFF
+}

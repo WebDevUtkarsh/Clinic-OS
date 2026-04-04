@@ -1,0 +1,49 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getTenantPrisma } from "@/lib/backend/prisma/tenant";
+import { requireAccess } from "@/lib/backend/rbac/guard";
+
+export async function GET(req: NextRequest) {
+  const error = requireAccess(req, {
+    permission: "audit:read",
+  });
+
+  if (error) return error;
+
+  try {
+    const tenantId = req.headers.get("x-tenant-id")!;
+    const isSuperAdmin = req.headers.get("x-super-admin") === "true";
+    const facilityIds = JSON.parse(
+      req.headers.get("x-facilities") || "[]"
+    ) as string[];
+    const prisma = await getTenantPrisma(tenantId);
+
+    const data = await prisma.auditLog.groupBy({
+      by: ["permissionUsed"],
+      where: isSuperAdmin
+        ? undefined
+        : {
+            OR: [
+              { facilityId: null },
+              { facilityId: { in: facilityIds } },
+            ],
+          },
+      _count: { permissionUsed: true },
+      orderBy: {
+        _count: { permissionUsed: "desc" },
+      },
+      take: 20,
+    });
+
+    return NextResponse.json({
+      success: true,
+      data,
+    });
+  } catch (err) {
+    console.error("Permission insights failed:", err);
+
+    return NextResponse.json(
+      { success: false },
+      { status: 500 }
+    );
+  }
+}

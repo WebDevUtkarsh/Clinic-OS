@@ -1,0 +1,202 @@
+:root {
+  --background: #f9fafb;
+  --foreground: #111827;
+  --card: #ffffff;
+  --border: #e5e7eb;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --primary-foreground: #f9fafb;
+  --accent: rgba(59, 130, 246, 0.1);
+  --accent-foreground: #60a5fa;
+  --ring: rgba(59, 130, 246, 0.15);
+  --input: #f3f4f6;
+  --input-border: #d1d5db;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --badge: rgba(59, 130, 246, 0.1);
+  --badge-border: rgba(59, 130, 246, 0.2);
+  --badge-foreground: #60a5fa;
+  --success: #10b981;
+  --analytics: #8b5cf6;
+  --danger: #ef4444;
+}
+
+.dark {
+  --background: #0b0f14;
+  --foreground: #f9fafb;
+  --card: #111827;
+  --border: rgba(255, 255, 255, 0.06);
+  --muted: #111827;
+  --muted-foreground: #9ca3af;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --primary-foreground: #f9fafb;
+  --accent: rgba(59, 130, 246, 0.1);
+  --accent-foreground: #60a5fa;
+  --ring: rgba(59, 130, 246, 0.15);
+  --input: #1f2937;
+  --input-border: rgba(255, 255, 255, 0.08);
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --badge: rgba(59, 130, 246, 0.1);
+  --badge-border: rgba(59, 130, 246, 0.2);
+  --badge-foreground: #60a5fa;
+  --success: #10b981;
+  --analytics: #8b5cf6;
+  --danger: #ef4444;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-input-border: var(--input-border);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-badge: var(--badge);
+  --color-badge-border: var(--badge-border);
+  --color-badge-foreground: var(--badge-foreground);
+  --color-success: var(--success);
+  --color-analytics: var(--analytics);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-geist-mono);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply bg-background text-foreground;
+  }
+
+  body {
+    min-height: 100vh;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-inter), "Segoe UI", sans-serif;
+  }
+
+  ::selection {
+    background: rgba(59, 130, 246, 0.24);
+  }
+}
+
+@keyframes auth-flow-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake-x {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20%,
+  60% {
+    transform: translateX(-8px);
+  }
+
+  40%,
+  80% {
+    transform: translateX(8px);
+  }
+}
+
+@keyframes auth-check-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.78);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes auth-progress {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(220%);
+  }
+}
+
+@keyframes dashboard-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@layer utilities {
+  .animate-auth-flow {
+    animation: auth-flow-enter 150ms ease-out;
+  }
+
+  .animate-shake {
+    animation: shake-x 300ms ease-in-out;
+  }
+
+  .animate-auth-check {
+    animation: auth-check-pop 220ms ease-out;
+  }
+
+  .animate-auth-progress {
+    animation: auth-progress 1.6s linear infinite;
+  }
+
+  .animate-dashboard-fade-up {
+    animation: dashboard-fade-up 400ms ease-out both;
+  }
+
+  .animation-delay-75 {
+    animation-delay: 75ms;
+  }
+
+  .animation-delay-150 {
+    animation-delay: 150ms;
+  }
+
+  .animation-delay-225 {
+    animation-delay: 225ms;
+  }
+
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+}

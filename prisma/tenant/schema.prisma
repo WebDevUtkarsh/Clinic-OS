@@ -1,0 +1,553 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../../src/generated/tenant"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Organization {
+  id   String @id @default(cuid())
+  name String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  facilities Facility[]
+
+  @@index([name])
+  @@map("organizations")
+}
+
+model Facility {
+  id String @id @default(cuid())
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  name    String
+  type    FacilityType
+  code    String?
+  gstNumber String?
+  address String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userRoles UserRole[]
+  doctorFacilities DoctorFacility[]
+  doctorSchedules DoctorSchedule[]
+  appointments Appointment[]
+  billings Billing[]
+  services Service[]
+  ledgerEntries LedgerEntry[]
+  invoices Invoice[]
+  invoiceSequences InvoiceSequence[]
+  financialDailyAggregates FinancialDailyAggregate[]
+
+  @@index([organizationId])
+  @@index([type])
+  @@map("facilities")
+}
+
+model Role {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+
+  createdAt DateTime @default(now())
+
+  permissions RolePermission[]
+  userRoles   UserRole[]
+
+  @@index([name])
+  @@map("roles")
+}
+
+model Permission {
+  id          String  @id @default(cuid())
+  key         String  @unique
+  description String?
+
+  createdAt DateTime @default(now())
+
+  roles RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           String @id @default(cuid())
+  roleId       String
+  permissionId String
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+  @@map("role_permissions")
+}
+
+model UserRole {
+  id String @id @default(cuid())
+
+  userId     String
+  roleId     String
+  facilityId String?
+
+  role     Role      @relation(fields: [roleId], references: [id])
+  facility Facility? @relation(fields: [facilityId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([roleId])
+  @@index([facilityId])
+  @@index([userId, facilityId])
+  @@map("user_roles")
+}
+
+model AuditLog {
+  id String @id @default(cuid())
+
+  userId         String
+  facilityId     String?
+  organizationId String?
+
+  action     String
+  resource   String
+  resourceId String?
+
+  permissionUsed String?
+
+  isSuperAdmin        Boolean
+  permissionsSnapshot String[]
+
+  ip        String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  metadata Json?
+
+  @@index([userId])
+  @@index([facilityId])
+  @@index([organizationId])
+  @@index([action])
+  @@index([createdAt])
+  @@index([userId, createdAt])
+  @@index([organizationId, createdAt])
+  @@index([facilityId, createdAt])
+  @@index([action, createdAt])
+  @@map("audit_logs")
+}
+
+model AuditDailyAggregate {
+  id       String @id @default(uuid())
+  date     String
+  tenantId String
+
+  total Int
+
+  users      Json
+  actions    Json
+  resources  Json
+  facilities Json
+
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, date])
+}
+
+model FinancialDailyAggregate {
+  id String @id @default(uuid())
+
+  date DateTime
+  facilityId String
+
+  revenue Decimal @db.Decimal(18, 2)
+  tax Decimal @db.Decimal(18, 2)
+  discount Decimal @db.Decimal(18, 2)
+  refunds Decimal @db.Decimal(18, 2)
+  writeOff Decimal @db.Decimal(18, 2)
+
+  netRevenue Decimal @db.Decimal(18, 2)
+
+  createdAt DateTime @default(now())
+
+  facility Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+
+  @@unique([date, facilityId])
+  @@index([facilityId])
+  @@index([date])
+  @@index([facilityId, date])
+}
+
+model AuditAnomaly {
+  id     String @id @default(uuid())
+  userId String
+
+  type     String
+  severity String
+  message  String
+  count    Int
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model AuditAlert {
+  id String @id @default(uuid())
+
+  userId   String
+  type     String
+  severity String
+  message  String
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([type])
+  @@index([severity])
+}
+
+model UserRiskScore {
+  userId    String   @id
+  score     Int
+  updatedAt DateTime @updatedAt
+
+  @@index([score])
+}
+
+model UserBehaviorProfile {
+  userId String @id
+
+  avgActionsPerMinute Float
+  lastUpdated         DateTime @updatedAt
+}
+
+model Patient {
+  id String @id @default(uuid())
+
+  facilityId String
+
+  name   String
+  gender Gender
+  dob    DateTime?
+
+  phone   String?
+  email   String?
+  address String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  isDeleted Boolean @default(false)
+
+  appointments Appointment[]
+  billings Billing[]
+
+  @@index([facilityId, isDeleted])
+  @@index([facilityId, createdAt])
+  @@index([facilityId])
+  @@index([createdAt])
+  @@index([name])
+}
+
+model Doctor {
+  id String @id @default(uuid())
+
+  userId String? // null until invite accepted
+
+  salutation String?
+  firstName String
+  lastName String
+
+  email String @unique
+  phone String?
+
+  specialization String?
+  licenseNumber String?
+  councilName String?
+
+  yearsOfExperience Int?
+
+  address String?
+  city String?
+  state String?
+  postalCode String?
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  facilities DoctorFacility[]
+  invites DoctorInvite[]
+  schedules DoctorSchedule[]
+  appointments Appointment[]
+  billings Billing[]
+
+  @@index([isActive])
+  @@index([createdAt])
+  @@index([lastName, firstName])
+  @@index([specialization])
+}
+
+model DoctorFacility {
+  id String @id @default(uuid())
+
+  doctorId String
+  facilityId String
+  organizationId String
+
+  consultationFee Float?
+  consultationDuration Int?
+  bufferBefore Int @default(0)
+  bufferAfter Int @default(0)
+
+  consultationStartTime String?
+  consultationEndTime String?
+
+  createdAt DateTime @default(now())
+
+  doctor   Doctor   @relation(fields: [doctorId], references: [id])
+  facility Facility @relation(fields: [facilityId], references: [id])
+
+  @@unique([doctorId, facilityId])
+  @@index([doctorId])
+  @@index([facilityId])
+  @@index([organizationId])
+}
+
+model DoctorSchedule {
+  id String @id @default(uuid())
+
+  doctorId String
+  facilityId String
+
+  dayOfWeek Int
+
+  startTime String
+  endTime String
+
+  createdAt DateTime @default(now())
+
+  doctor Doctor @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  facility Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+
+  @@index([doctorId, facilityId, dayOfWeek])
+  @@index([facilityId, dayOfWeek])
+}
+
+model DoctorInvite {
+  id String @id @default(uuid())
+
+  doctorId String
+  email String
+
+  tokenHash String @unique
+  expiresAt DateTime
+
+  acceptedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  doctor Doctor @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  @@index([doctorId])
+  @@index([email])
+  @@index([expiresAt])
+}
+
+model Appointment {
+  id String @id @default(uuid())
+
+  patientId String
+  doctorId String
+  facilityId String
+
+  startTime DateTime
+  endTime DateTime
+
+  status AppointmentStatus
+
+  createdBy String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  patient Patient @relation(fields: [patientId], references: [id])
+  doctor Doctor @relation(fields: [doctorId], references: [id])
+  facility Facility @relation(fields: [facilityId], references: [id])
+  billing Billing?
+
+  @@index([facilityId, startTime])
+  @@index([doctorId, startTime])
+  @@index([facilityId, status, startTime])
+  @@index([doctorId, status, startTime])
+}
+
+model Billing {
+  id String @id @default(uuid())
+
+  patientId String
+  doctorId String?
+  facilityId String
+  appointmentId String? @unique
+
+  status BillingStatus
+
+  createdBy String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  patient Patient @relation(fields: [patientId], references: [id])
+  doctor Doctor? @relation(fields: [doctorId], references: [id])
+  facility Facility @relation(fields: [facilityId], references: [id])
+  appointment Appointment? @relation(fields: [appointmentId], references: [id])
+  items BillingItem[]
+  ledgerEntries LedgerEntry[]
+  payments Payment[]
+  invoice Invoice?
+
+  @@index([facilityId, createdAt])
+  @@index([facilityId, status, createdAt])
+  @@index([facilityId, doctorId, createdAt])
+  @@index([patientId])
+  @@index([doctorId])
+}
+
+model BillingItem {
+  id String @id @default(uuid())
+
+  billingId String
+
+  type BillingItemType
+  name String
+
+  quantity Int
+  unitPrice Decimal @db.Decimal(18, 2)
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  billing Billing @relation(fields: [billingId], references: [id], onDelete: Cascade)
+
+  @@index([billingId, createdAt])
+}
+
+model LedgerEntry {
+  id String @id @default(uuid())
+
+  billingId String
+  facilityId String
+
+  type LedgerType
+
+  amount Decimal @db.Decimal(18, 2)
+
+  referenceType String
+  referenceId String?
+
+  metadata Json?
+
+  createdBy String
+
+  createdAt DateTime @default(now())
+
+  billing Billing @relation(fields: [billingId], references: [id], onDelete: Cascade)
+  facility Facility @relation(fields: [facilityId], references: [id])
+
+  @@index([billingId])
+  @@index([facilityId])
+  @@index([createdAt])
+  @@index([facilityId, createdAt])
+  @@index([billingId, type])
+  @@index([facilityId, type, createdAt])
+  @@index([referenceType, referenceId])
+}
+
+model Payment {
+  id String @id @default(uuid())
+
+  billingId String
+
+  amount Decimal @db.Decimal(18, 2)
+  method PaymentMethod
+
+  referenceId String?
+  idempotencyKey String?
+  status PaymentStatus
+
+  createdAt DateTime @default(now())
+
+  billing Billing @relation(fields: [billingId], references: [id], onDelete: Cascade)
+
+  @@index([billingId])
+  @@index([billingId, createdAt])
+  @@index([createdAt])
+  @@index([method, createdAt])
+  @@index([referenceId])
+  @@unique([billingId, idempotencyKey])
+}
+
+model Service {
+  id String @id @default(uuid())
+
+  name String
+  type BillingItemType
+
+  defaultPrice Decimal @db.Decimal(18, 2)
+
+  facilityId String
+
+  facility Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+
+  @@index([facilityId])
+  @@index([facilityId, name])
+}
+
+model Invoice {
+  id String @id @default(uuid())
+
+  billingId String @unique
+  facilityId String
+
+  invoiceNumber String @unique
+
+  snapshot Json
+
+  createdAt DateTime @default(now())
+
+  billing Billing @relation(fields: [billingId], references: [id], onDelete: Restrict)
+  facility Facility @relation(fields: [facilityId], references: [id], onDelete: Restrict)
+
+  @@index([facilityId])
+  @@index([billingId])
+  @@index([facilityId, createdAt])
+}
+
+model InvoiceSequence {
+  id String @id @default(uuid())
+
+  facilityId String
+  year Int
+  lastNumber Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  facility Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+
+  @@unique([facilityId, year])
+  @@index([facilityId])
+}

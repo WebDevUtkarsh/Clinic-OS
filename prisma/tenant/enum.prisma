@@ -1,0 +1,57 @@
+enum FacilityType {
+  CLINIC
+  HOSPITAL
+  DIAGNOSTIC
+  PHARMACY
+}
+
+enum Gender {
+  Male
+  Female
+  Other
+}
+
+enum AppointmentStatus {
+  BOOKED
+  CANCELLED
+  COMPLETED
+}
+
+enum BillingStatus {
+  DRAFT
+  GENERATED
+  PARTIALLY_PAID
+  PAID
+  CANCELLED
+}
+
+enum BillingItemType {
+  CONSULTATION
+  TREATMENT
+  LAB
+  MEDICATION
+  PACKAGE
+  OTHER
+}
+
+enum LedgerType {
+  CHARGE
+  PAYMENT
+  REFUND
+  DISCOUNT
+  TAX
+  WRITE_OFF
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  UPI
+  ONLINE
+}
+
+enum PaymentStatus {
+  SUCCESS
+  FAILED
+  REFUNDED
+}
