@@ -29,6 +29,7 @@ import {
   getRoleBadgeClasses,
   navigationSections,
 } from "@/components/layout/dashboard-utils";
+import { Can } from "@/hooks/use-can";
 
 type SidebarProps = {
   facilityId: string;
@@ -65,7 +66,7 @@ function NavItem({
           ? collapsed
             ? "bg-blue-500/10 text-blue-500"
             : "border-l-2 border-l-blue-500 bg-blue-500/10 text-blue-500"
-          : "text-gray-500 hover:bg-black/5 hover:text-gray-900 dark:text-[#6B7280] dark:hover:bg-white/[0.04] dark:hover:text-[#F9FAFB]",
+          : "text-gray-500 hover:bg-black/5 hover:text-gray-900 dark:text-[#6B7280] dark:hover:bg-white/4 dark:hover:text-[#F9FAFB]",
       )}
     >
       <Icon className="h-5 w-5 shrink-0" />
@@ -79,7 +80,7 @@ function NavItem({
       </span>
 
       {collapsed ? (
-        <span className="pointer-events-none absolute left-[calc(100%+12px)] top-1/2 hidden -translate-y-1/2 rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs font-medium text-gray-900 shadow-lg group-hover:flex dark:border-white/[0.08] dark:bg-[#111827] dark:text-[#F9FAFB]">
+        <span className="pointer-events-none absolute left-[calc(100%+12px)] top-1/2 hidden -translate-y-1/2 rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs font-medium text-gray-900 shadow-lg group-hover:flex dark:border-white/8 dark:bg-[#111827] dark:text-[#F9FAFB]">
           {label}
         </span>
       ) : null}
@@ -169,9 +170,9 @@ export function Sidebar({ facilityId, facilities, session }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "fixed inset-y-0 left-0 z-50 flex flex-col overflow-hidden border-r border-gray-200 bg-white transition-all duration-300 ease-in-out dark:border-white/[0.06] dark:bg-[#0D1117]",
+        "fixed inset-y-0 left-0 z-50 flex flex-col overflow-hidden border-r border-gray-200 bg-white transition-all duration-300 ease-in-out dark:border-white/6 dark:bg-[#0D1117]",
         isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
-        isSidebarCollapsed ? "w-12 px-1.5 py-4" : "w-[296px] px-4 py-6",
+        isSidebarCollapsed ? "w-12 px-1.5 py-4" : "w-74 px-4 py-6",
       )}
     >
       <div className="flex items-center justify-between gap-3">
@@ -208,7 +209,7 @@ export function Sidebar({ facilityId, facilities, session }: SidebarProps) {
         <button
           type="button"
           onClick={() => setSidebarOpen(false)}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 text-gray-500 lg:hidden dark:border-white/[0.08] dark:text-[#9CA3AF]"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 text-gray-500 lg:hidden dark:border-white/8 dark:text-[#9CA3AF]"
           aria-label="Close sidebar"
         >
           <X className="h-4 w-4" />
@@ -220,7 +221,7 @@ export function Sidebar({ facilityId, facilities, session }: SidebarProps) {
           type="button"
           onClick={() => setFacilityMenuOpen((current) => !current)}
           className={cn(
-            "flex w-full items-center rounded-xl border border-gray-200 bg-gray-100 px-3 py-2 text-left transition-colors hover:border-blue-500/20 hover:bg-gray-50 dark:border-white/[0.08] dark:bg-[#1F2937] dark:hover:bg-[#1F2937]/80",
+            "flex w-full items-center rounded-xl border border-gray-200 bg-gray-100 px-3 py-2 text-left transition-colors hover:border-blue-500/20 hover:bg-gray-50 dark:border-white/8 dark:bg-[#1F2937] dark:hover:bg-[#1F2937]/80",
             isSidebarCollapsed
               ? "h-9 justify-center rounded-2xl px-0"
               : "gap-3",
@@ -252,7 +253,7 @@ export function Sidebar({ facilityId, facilities, session }: SidebarProps) {
         {facilityMenuOpen ? (
           <div
             className={cn(
-              "absolute top-[calc(100%+12px)] z-20 rounded-2xl border border-gray-200 bg-white p-2 shadow-2xl dark:border-white/[0.08] dark:bg-[#111827]",
+              "absolute top-[calc(100%+12px)] z-20 rounded-2xl border border-gray-200 bg-white p-2 shadow-2xl dark:border-white/8 dark:bg-[#111827]",
               isSidebarCollapsed ? "left-full ml-3 w-64" : "w-full",
             )}
           >
@@ -268,7 +269,7 @@ export function Sidebar({ facilityId, facilities, session }: SidebarProps) {
                     "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm transition-colors",
                     active
                       ? "bg-blue-500/10 text-blue-500"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-[#9CA3AF] dark:hover:bg-white/[0.04] dark:hover:text-[#F9FAFB]",
+                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-[#9CA3AF] dark:hover:bg-white/4 dark:hover:text-[#F9FAFB]",
                   )}
                 >
                   <Building2 className="h-4 w-4 shrink-0" />
@@ -302,7 +303,7 @@ export function Sidebar({ facilityId, facilities, session }: SidebarProps) {
             onClick={() => scrollNavigation("up")}
             disabled={!canScrollUp}
             className={cn(
-              "inline-flex shrink-0 items-center justify-center border border-gray-200 bg-gray-50 text-gray-500 transition-all dark:border-white/[0.06] dark:bg-[#111827] dark:text-[#6B7280]",
+              "inline-flex shrink-0 items-center justify-center border border-gray-200 bg-gray-50 text-gray-500 transition-all dark:border-white/6 dark:bg-[#111827] dark:text-[#6B7280]",
               isSidebarCollapsed
                 ? "mb-3 h-7 w-7 rounded-2xl"
                 : "hidden",
@@ -350,9 +351,8 @@ export function Sidebar({ facilityId, facilities, session }: SidebarProps) {
                           ? pathname === href
                           : pathname.startsWith(href);
 
-                      return (
+                      const navNode = (
                         <NavItem
-                          key={item.href}
                           href={href}
                           label={item.label}
                           icon={item.icon}
@@ -361,6 +361,16 @@ export function Sidebar({ facilityId, facilities, session }: SidebarProps) {
                           onNavigate={() => setSidebarOpen(false)}
                         />
                       );
+
+                      if (item.permission) {
+                        return (
+                          <Can key={item.href} permission={item.permission}>
+                            {navNode}
+                          </Can>
+                        );
+                      }
+
+                      return <div key={item.href}>{navNode}</div>;
                     })}
                   </div>
                 </div>
@@ -373,7 +383,7 @@ export function Sidebar({ facilityId, facilities, session }: SidebarProps) {
             onClick={() => scrollNavigation("down")}
             disabled={!canScrollDown}
             className={cn(
-              "inline-flex shrink-0 items-center justify-center border border-gray-200 bg-gray-50 text-gray-500 transition-all dark:border-white/[0.06] dark:bg-[#111827] dark:text-[#6B7280]",
+              "inline-flex shrink-0 items-center justify-center border border-gray-200 bg-gray-50 text-gray-500 transition-all dark:border-white/6 dark:bg-[#111827] dark:text-[#6B7280]",
               isSidebarCollapsed
                 ? "mt-3 h-7 w-7 rounded-2xl"
                 : "hidden",
@@ -394,7 +404,7 @@ export function Sidebar({ facilityId, facilities, session }: SidebarProps) {
               onClick={() => scrollNavigation("up")}
               disabled={!canScrollUp}
               className={cn(
-                "pointer-events-auto inline-flex h-7 w-7 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-gray-500 transition-all dark:border-white/[0.06] dark:bg-[#111827] dark:text-[#6B7280]",
+                "pointer-events-auto inline-flex h-7 w-7 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-gray-500 transition-all dark:border-white/6 dark:bg-[#111827] dark:text-[#6B7280]",
                 canScrollUp
                   ? "hover:border-blue-500/20 hover:text-blue-500 dark:hover:text-[#9CA3AF]"
                   : "cursor-default opacity-35",
@@ -404,7 +414,7 @@ export function Sidebar({ facilityId, facilities, session }: SidebarProps) {
               <ChevronUp className="h-3.5 w-3.5" />
             </button>
 
-            <div className="relative my-3 flex-1 w-px rounded-full bg-gray-200/80 dark:bg-white/[0.08]">
+            <div className="relative my-3 flex-1 w-px rounded-full bg-gray-200/80 dark:bg-white/8">
               <div className="absolute -inset-x-1 inset-y-0 rounded-full bg-linear-to-b from-blue-500/0 via-blue-500/5 to-blue-500/0" />
               <span
                 className={cn(
@@ -423,7 +433,7 @@ export function Sidebar({ facilityId, facilities, session }: SidebarProps) {
               onClick={() => scrollNavigation("down")}
               disabled={!canScrollDown}
               className={cn(
-                "pointer-events-auto inline-flex h-7 w-7 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-gray-500 transition-all dark:border-white/[0.06] dark:bg-[#111827] dark:text-[#6B7280]",
+                "pointer-events-auto inline-flex h-7 w-7 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-gray-500 transition-all dark:border-white/6 dark:bg-[#111827] dark:text-[#6B7280]",
                 canScrollDown
                   ? "hover:border-blue-500/20 hover:text-blue-500 dark:hover:text-[#9CA3AF]"
                   : "cursor-default opacity-35",
@@ -438,12 +448,12 @@ export function Sidebar({ facilityId, facilities, session }: SidebarProps) {
 
       <div
         className={cn(
-          "shrink-0 border-t border-gray-200 pt-4 dark:border-white/[0.06]",
+          "shrink-0 border-t border-gray-200 pt-4 dark:border-white/6",
           isSidebarCollapsed ? "space-y-2" : "space-y-3",
         )}
       >
         {!isSidebarCollapsed ? (
-          <div className="flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 px-3 py-3 dark:border-white/[0.06] dark:bg-[#111827]">
+          <div className="flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 px-3 py-3 dark:border-white/6 dark:bg-[#111827]">
             <span
               className={cn(
                 "rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em]",
@@ -460,7 +470,7 @@ export function Sidebar({ facilityId, facilities, session }: SidebarProps) {
 
         <div
           className={cn(
-            "flex items-center rounded-2xl border border-gray-200 bg-gray-50 dark:border-white/[0.06] dark:bg-[#111827]",
+            "flex items-center rounded-2xl border border-gray-200 bg-gray-50 dark:border-white/6 dark:bg-[#111827]",
             isSidebarCollapsed ? "h-10 justify-center px-0" : "gap-3 px-3 py-3",
           )}
           title={isSidebarCollapsed ? session.user.name : undefined}
@@ -501,7 +511,7 @@ export function Sidebar({ facilityId, facilities, session }: SidebarProps) {
           type="button"
           onClick={toggleSidebarCollapsed}
           className={cn(
-            "hidden items-center justify-center gap-2 border border-gray-200 bg-gray-50 text-sm font-medium text-gray-600 transition-colors hover:border-blue-500/20 hover:text-gray-900 lg:flex dark:border-white/[0.06] dark:bg-[#111827] dark:text-[#9CA3AF] dark:hover:text-[#F9FAFB]",
+            "hidden items-center justify-center gap-2 border border-gray-200 bg-gray-50 text-sm font-medium text-gray-600 transition-colors hover:border-blue-500/20 hover:text-gray-900 lg:flex dark:border-white/6 dark:bg-[#111827] dark:text-[#9CA3AF] dark:hover:text-[#F9FAFB]",
             isSidebarCollapsed
               ? "h-9 w-full rounded-2xl px-0"
               : "h-11 w-full rounded-xl px-3",

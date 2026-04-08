@@ -9,7 +9,7 @@ import {
   Ticket,
   UserRound,
 } from "lucide-react";
-import { ApiClientError, apiRequest } from "@/lib/api/client";
+import { ApiClientError, apiClient } from "@/lib/api/client";
 import { AuthBadge, AuthCard } from "@/components/auth/AuthCard";
 import { AuthField } from "@/components/auth/AuthField";
 import {
@@ -93,12 +93,9 @@ export function DoctorInviteForm({
     setIsSubmitting(true);
 
     try {
-      await apiRequest("/api/invites/accept", {
-        method: "POST",
-        body: {
-          token: token.trim(),
-          password,
-        },
+      await apiClient.post("/invites/accept", {
+        token: token.trim(),
+        password,
       });
 
       onActivated("Invitation accepted. Sign in to continue.");

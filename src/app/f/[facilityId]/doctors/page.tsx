@@ -1,4 +1,4 @@
-import { ModulePlaceholder } from "@/components/dashboard/ModulePlaceholder";
+import { DoctorsPageClient } from "@/features/doctors/components/doctors-page-client";
 
 type DoctorsRoutePageProps = {
   params: Promise<{ facilityId: string }>;
@@ -9,11 +9,5 @@ export default async function DoctorsRoutePage({
 }: DoctorsRoutePageProps) {
   const { facilityId } = await params;
 
-  return (
-    <ModulePlaceholder
-      facilityId={facilityId}
-      title="Doctors"
-      description="Roster management, provider availability, and specialty performance will live here."
-    />
-  );
+  return <DoctorsPageClient facilityId={facilityId} />;
 }

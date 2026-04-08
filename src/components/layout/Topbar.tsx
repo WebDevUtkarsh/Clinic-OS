@@ -70,7 +70,7 @@ export function Topbar({
         <div className="min-w-0 flex-1 lg:flex-none">
           <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-[#9CA3AF]">
             <span className="truncate">
-              {session.tenant.name || "Utkarsh Healthcare Group"}
+              {session.tenant.name}
             </span>
             <span className="text-gray-400 dark:text-[#6B7280]">{">"}</span>
             <span className="truncate">{organizationLabel}</span>

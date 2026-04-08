@@ -142,3 +142,46 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export async function GET(req: NextRequest) {
+  const accessError = requireAccess(req, {
+    permission: "facilities:create",
+  });
+
+  if (accessError) {
+    return accessError;
+  }
+
+  const tenantId = req.headers.get("x-tenant-id");
+  if (!tenantId) {
+    return NextResponse.json(
+      { success: false, error: "Unauthorized" },
+      { status: 401 },
+    );
+  }
+
+  try {
+    const prisma = await getTenantPrisma(tenantId);
+    const facilities = await prisma.facility.findMany({
+      select: {
+        id: true,
+        organizationId: true,
+        name: true,
+        type: true,
+        address: true,
+      },
+      orderBy: { name: "asc" },
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: facilities,
+    });
+  } catch (error) {
+    console.error("Fetch facilities failed:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to fetch facilities" },
+      { status: 500 },
+    );
+  }
+}

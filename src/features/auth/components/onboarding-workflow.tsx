@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useOptimistic, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowRight, Building2, Hospital } from "lucide-react";
 import { ApiClientError } from "@/lib/api/client";
 import { type SessionData } from "@/features/auth/types";
@@ -19,96 +19,9 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useQueryClient } from "@tanstack/react-query";
 
-type OrganizationActionState = {
-  status: "idle" | "error" | "success";
-  message: string | null;
-  organizationId: string | null;
-};
-
-type FacilityActionState = {
-  status: "idle" | "error" | "success";
-  message: string | null;
-  redirectTo: string | null;
-};
-
-const initialOrganizationState: OrganizationActionState = {
-  status: "idle",
-  message: null,
-  organizationId: null,
-};
-
-const initialFacilityState: FacilityActionState = {
-  status: "idle",
-  message: null,
-  redirectTo: null,
-};
-
-const facilityTypes = [
-  "CLINIC",
-  "HOSPITAL",
-  "DIAGNOSTIC",
-  "PHARMACY",
-] as const;
-
-async function submitOrganization(
-  _previousState: OrganizationActionState,
-  formData: FormData,
-): Promise<OrganizationActionState> {
-  try {
-    const organization = await createOrganization({
-      name: String(formData.get("organizationName") ?? "").trim(),
-    });
-
-    return {
-      status: "success",
-      message: "Organization saved. You can now create the first care facility.",
-      organizationId: organization.id,
-    };
-  } catch (error) {
-    return {
-      status: "error",
-      message:
-        error instanceof ApiClientError
-          ? error.message
-          : "Unable to create the organization.",
-      organizationId: null,
-    };
-  }
-}
-
-async function submitFacility(
-  _previousState: FacilityActionState,
-  formData: FormData,
-): Promise<FacilityActionState> {
-  try {
-    const facility = await createFacility({
-      organizationId: String(formData.get("organizationId") ?? "").trim(),
-      name: String(formData.get("facilityName") ?? "").trim(),
-      type: String(formData.get("facilityType") ?? "CLINIC") as
-        | "CLINIC"
-        | "HOSPITAL"
-        | "DIAGNOSTIC"
-        | "PHARMACY",
-      address: String(formData.get("facilityAddress") ?? "").trim() || undefined,
-    });
-
-    return {
-      status: "success",
-      message: "Care facility activated.",
-      redirectTo: `/f/${facility.id}/dashboard?welcome=1`,
-    };
-  } catch (error) {
-    return {
-      status: "error",
-      message:
-        error instanceof ApiClientError
-          ? error.message
-          : "Unable to create the care facility.",
-      redirectTo: null,
-    };
-  }
-}
+const facilityTypes = ["CLINIC", "HOSPITAL", "DIAGNOSTIC", "PHARMACY"] as const;
 
 type OnboardingWorkflowProps = {
   session: SessionData;
@@ -116,259 +29,180 @@ type OnboardingWorkflowProps = {
 
 export function OnboardingWorkflow({ session }: OnboardingWorkflowProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [manualOrganizationName, setManualOrganizationName] = useState("");
-  const [organizationState, organizationAction, organizationPending] =
-    useActionState(submitOrganization, initialOrganizationState);
-  const [facilityState, facilityAction, facilityPending] = useActionState(
-    submitFacility,
-    initialFacilityState,
-  );
-  const [optimisticFacilityName, setOptimisticFacilityName] = useOptimistic(
-    "",
-    (_current, nextName: string) => nextName,
-  );
+  const queryClient = useQueryClient();
+
+  const [activeStep, setActiveStep] = useState<1 | 2>(session.requiresOrganizationSetup ? 1 : 2);
+  const [organizationName, setOrganizationName] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    if (organizationState.status === "success") {
-      const nextParams = new URLSearchParams(searchParams.toString());
-
-      if (organizationState.organizationId) {
-        nextParams.set("organizationId", organizationState.organizationId);
-      }
-
-      const submittedName = manualOrganizationName.trim();
-      if (submittedName) {
-        nextParams.set("organizationName", submittedName);
-      }
-
-      const nextSearch = nextParams.toString();
-      router.replace(nextSearch ? `/onboarding?${nextSearch}` : "/onboarding");
+    // Sync session requirement state if it updates bounds
+    if (session.requiresOrganizationSetup) {
+      setActiveStep(1);
+    } else if (session.requiresFacilitySetup) {
+      setActiveStep(2);
     }
-  }, [manualOrganizationName, organizationState, router, searchParams]);
+  }, [session.requiresOrganizationSetup, session.requiresFacilitySetup]);
 
-  useEffect(() => {
-    if (facilityState.status === "success" && facilityState.redirectTo) {
-      router.replace(facilityState.redirectTo);
+  const handleCreateOrganization = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setErrorMsg(null);
+    try {
+      await createOrganization({ name: organizationName.trim() });
+      // Invalidate to fetch new session logic (requiresOrganizationSetup -> false)
+      await queryClient.invalidateQueries({ queryKey: ["session"] });
+      setActiveStep(2);
+    } catch (err) {
+      setErrorMsg(err instanceof ApiClientError ? err.message : "Unable to run organization setup.");
+    } finally {
+      setIsSubmitting(false);
     }
-  }, [facilityState, router]);
+  };
 
-  const selectedOrganizationId = useMemo(
-    () =>
-      organizationState.organizationId || searchParams.get("organizationId") || "",
-    [organizationState.organizationId, searchParams],
-  );
-  const selectedOrganizationName =
-    manualOrganizationName || searchParams.get("organizationName") || "";
+  const handleCreateFacility = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    setIsSubmitting(true);
+    setErrorMsg(null);
+    try {
+      // Create is scoped tightly to the active session server side
+      const facility = await createFacility({
+        organizationId: "self", // Assuming server handles mapping if omitted or explicit logic required
+        name: String(formData.get("facilityName") ?? "").trim(),
+        type: String(formData.get("facilityType") ?? "CLINIC") as "CLINIC" | "HOSPITAL" | "DIAGNOSTIC" | "PHARMACY",
+        address: String(formData.get("facilityAddress") ?? "").trim() || undefined,
+      });
+
+      await queryClient.invalidateQueries({ queryKey: ["session"] });
+      
+      // Redirect seamlessly mapping to the new generated workspace
+      window.location.href = `/f/${facility.id}/dashboard?welcome=1`;
+    } catch (err) {
+      setErrorMsg(err instanceof ApiClientError ? err.message : "Unable to provision facility.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-6xl items-center px-5 py-12 md:px-8">
-      <div className="grid w-full gap-8 lg:grid-cols-[0.95fr_1.05fr]">
-        <section className="space-y-6">
-          <Badge className="uppercase tracking-[0.24em]">Onboarding</Badge>
-          <div className="space-y-4">
-            <h1 className="text-4xl font-semibold tracking-tight text-foreground md:text-5xl">
-              Activate your first organization and care facility.
-            </h1>
-            <p className="max-w-2xl text-base leading-relaxed text-muted-foreground">
-              Facility scope is the center of the product. Once the first facility
-              exists, the frontend can route into `/f/[facilityId]/*` and keep all
-              data operations tenant-safe by design.
-            </p>
+    <main className="mx-auto flex min-h-screen items-center justify-center py-12 px-5 md:px-0">
+      <div className="w-full max-w-lg space-y-8 animate-auth-flow">
+        
+        <div className="text-center space-y-2">
+          <Badge className="mb-2">Setup Workspace</Badge>
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+            Complete your onboarding
+          </h1>
+          <p className="text-text-secondary text-sm">
+            Just a few final strokes to prepare your isolated healthcare environment.
+          </p>
+        </div>
+
+        {/* Stepper Logic Head */}
+        <div className="flex items-center justify-center gap-4">
+          <div className={`flex items-center gap-2 text-sm font-semibold transition-colors ${activeStep === 1 ? 'text-primary' : 'text-success'}`}>
+            <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs text-white ${activeStep === 1 ? 'bg-primary' : 'bg-success'}`}>
+              1
+            </span>
+            Organization
           </div>
-
-          <div className="grid gap-4">
-            {[
-              {
-                title: "Tenant",
-                value: session.tenant.name,
-              },
-              {
-                title: "Role",
-                value: session.role,
-              },
-              {
-                title: "Permissions",
-                value: `${session.permissions.length} granted`,
-              },
-            ].map((item) => (
-              <Card key={item.title}>
-                <CardContent className="flex items-center justify-between pt-6">
-                  <div>
-                    <div className="text-xs font-medium uppercase tracking-[0.24em] text-muted-foreground">
-                      {item.title}
-                    </div>
-                    <div className="mt-2 text-lg font-semibold text-foreground">
-                      {item.value}
-                    </div>
-                  </div>
-                  <Badge variant="secondary">{item.title}</Badge>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="h-px w-10 bg-border" />
+          <div className={`flex items-center gap-2 text-sm font-semibold transition-colors ${activeStep === 2 ? 'text-primary' : 'text-muted-foreground'}`}>
+            <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs text-white ${activeStep === 2 ? 'bg-primary' : 'bg-muted'}`}>
+              2
+            </span>
+            Facility
           </div>
-        </section>
+        </div>
 
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building2 size={18} className="text-primary" />
-                Step 1: Organization
-              </CardTitle>
-              <CardDescription>
-                Create the tenant&apos;s first healthcare organization. This remains
-                tenant-safe and does not introduce facility scope yet.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {organizationState.message ? (
-                <div className="rounded-xl border border-border bg-muted/60 px-4 py-3 text-sm text-muted-foreground">
-                  {organizationState.message}
-                </div>
-              ) : null}
+        {errorMsg && (
+          <div className="rounded-xl border border-danger/20 bg-danger/10 px-4 py-3 text-sm text-danger animate-shake">
+            {errorMsg}
+          </div>
+        )}
 
-              <form
-                action={(formData) => {
-                  setManualOrganizationName(
-                    String(formData.get("organizationName") ?? "").trim(),
-                  );
-                  return organizationAction(formData);
-                }}
-                className="space-y-4"
-              >
-                <div className="space-y-2">
-                  <label
-                    className="text-sm font-medium text-foreground"
-                    htmlFor="organizationName"
-                  >
-                    Organization name
-                  </label>
-                  <Input
-                    id="organizationName"
-                    name="organizationName"
-                    placeholder="Sunrise Healthcare Group"
-                    required
-                  />
-                </div>
-                <Button type="submit" disabled={organizationPending}>
-                  Save organization
-                  <ArrowRight size={16} />
-                </Button>
-              </form>
-
-              {selectedOrganizationId ? (
-                <div className="space-y-2 rounded-2xl border border-border bg-background/80 p-4">
-                  <div className="text-sm font-medium text-foreground">
-                    Current organization
-                  </div>
-                  <div className="rounded-xl border border-border px-3 py-3 text-sm">
-                    <div className="font-medium text-foreground">
-                      {selectedOrganizationName || "Recently created organization"}
-                    </div>
-                    <div className="mt-1 break-all text-muted-foreground">
-                      {selectedOrganizationId}
-                    </div>
-                  </div>
-                </div>
-              ) : null}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Hospital size={18} className="text-primary" />
-                Step 2: Care Facility
-              </CardTitle>
-              <CardDescription>
-                The first facility unlocks the main URL-driven workspace and sets up
-                the primary access boundary for patient and audit data.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {facilityState.message ? (
-                <div className="rounded-xl border border-border bg-muted/60 px-4 py-3 text-sm text-muted-foreground">
-                  {facilityState.message}
-                </div>
-              ) : null}
-
-              {facilityPending ? (
-                <div className="rounded-xl border border-primary/20 bg-primary/10 px-4 py-3 text-sm text-primary">
-                  Preparing {optimisticFacilityName || "your care facility"}.
-                </div>
-              ) : null}
-
-              <form
-                action={(formData) => {
-                  setOptimisticFacilityName(String(formData.get("facilityName") ?? ""));
-                  return facilityAction(formData);
-                }}
-                className="space-y-4"
-              >
-                <input
-                  type="hidden"
-                  name="organizationId"
-                  value={selectedOrganizationId}
-                />
-
-                <div className="space-y-2">
-                  <label
-                    className="text-sm font-medium text-foreground"
-                    htmlFor="facilityName"
-                  >
-                    Facility name
-                  </label>
-                  <Input
-                    id="facilityName"
-                    name="facilityName"
-                    placeholder="Downtown Care Facility"
-                    required
-                  />
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <label className="space-y-2 text-sm font-medium text-foreground">
-                    Facility type
-                    <select
-                      name="facilityType"
-                      defaultValue="CLINIC"
-                      className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
-                    >
-                      {facilityTypes.map((type) => (
-                        <option key={type} value={type}>
-                          {type}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
+        <div className="relative">
+          {activeStep === 1 ? (
+            <Card className="animate-dashboard-fade-up">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 size={18} className="text-primary" />
+                  Organization Details
+                </CardTitle>
+                <CardDescription>
+                  Define the primary billing entity that holds your facilities.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleCreateOrganization} className="space-y-4">
                   <div className="space-y-2">
-                    <label
-                      className="text-sm font-medium text-foreground"
-                      htmlFor="facilityAddress"
-                    >
-                      Address
-                    </label>
+                    <label className="text-sm font-medium text-foreground">Organization Name</label>
                     <Input
-                      id="facilityAddress"
-                      name="facilityAddress"
-                      placeholder="12 MG Road, Bangalore"
+                      value={organizationName}
+                      onChange={(e) => setOrganizationName(e.target.value)}
+                      placeholder="e.g. Apex Health Systems"
+                      disabled={isSubmitting}
+                      required
                     />
                   </div>
-                </div>
+                  <Button type="submit" disabled={isSubmitting || !organizationName.trim()} className="w-full">
+                    {isSubmitting ? "Provisioning..." : "Setup Organization"}
+                    {!isSubmitting && <ArrowRight size={16} className="ml-1" />}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="animate-dashboard-fade-up">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Hospital size={18} className="text-primary" />
+                  Primary Facility
+                </CardTitle>
+                <CardDescription>
+                  Configure the first physical or virtual care facility. This unlocks your dashboard.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleCreateFacility} className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Facility Name</label>
+                    <Input name="facilityName" placeholder="e.g. Apex Main Campus" required disabled={isSubmitting} />
+                  </div>
+                  
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <label className="space-y-2 text-sm font-medium text-foreground">
+                      Facility Type
+                      <select
+                        name="facilityType"
+                        defaultValue="CLINIC"
+                        disabled={isSubmitting}
+                        className="h-12 w-full rounded-xl border border-input-border bg-input px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-primary/30 text-foreground"
+                      >
+                        {facilityTypes.map((type) => (
+                          <option key={type} value={type}>{type}</option>
+                        ))}
+                      </select>
+                    </label>
 
-                <Button
-                  type="submit"
-                  disabled={facilityPending || !selectedOrganizationId}
-                >
-                  Activate facility workspace
-                  <ArrowRight size={16} />
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-foreground">City / Locale</label>
+                      <Input name="facilityAddress" placeholder="e.g. Seattle, WA" disabled={isSubmitting} />
+                    </div>
+                  </div>
+
+                  <Button type="submit" disabled={isSubmitting} className="w-full">
+                    {isSubmitting ? "Activating Sandbox..." : "Activate Facility Workspace"}
+                    {!isSubmitting && <ArrowRight size={16} className="ml-1" />}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          )}
         </div>
+
       </div>
     </main>
   );

@@ -6,6 +6,8 @@ import { AuthEventListener } from "@/features/auth/components/auth-event-listene
 import { createQueryClient } from "@/lib/query/query-client";
 import { useUIStore } from "@/lib/store/ui-store";
 import { ThemeProvider } from "@/providers/theme-provider";
+import { SessionProvider } from "@/features/auth/components/SessionProvider";
+import { FacilityProvider } from "@/features/auth/components/FacilityProvider";
 
 type AppProvidersProps = {
   children: React.ReactNode;
@@ -27,8 +29,12 @@ export function AppProviders({ children }: AppProvidersProps) {
       storageKey="clinic-os-theme"
     >
       <QueryClientProvider client={queryClient}>
-        <AuthEventListener />
-        {children}
+        <SessionProvider>
+          <FacilityProvider>
+            <AuthEventListener />
+            {children}
+          </FacilityProvider>
+        </SessionProvider>
       </QueryClientProvider>
     </ThemeProvider>
   );

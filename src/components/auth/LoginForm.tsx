@@ -8,7 +8,8 @@ import {
   type ReadonlyURLSearchParams,
 } from "next/navigation";
 import { ApiClientError } from "@/lib/api/client";
-import { loginWithPassword } from "@/features/auth/api";
+import { loginWithPassword, selectTenant, getAuthSession } from "@/features/auth/api";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   resolvePostAuthRoute,
   type LoginTenantOption,
@@ -29,6 +30,7 @@ type ActiveFlow =
   | "doctorInvite"
   | "staff"
   | "forgotPassword"
+  | "selectTenant"
   | "onboarding";
 
 function createInitialFlow(searchParams: ReadonlyURLSearchParams): ActiveFlow {
@@ -64,27 +66,40 @@ type LoginPanelProps = {
   onOpenDoctorInvite: () => void;
 };
 
-function TenantList({ tenants }: { tenants: LoginTenantOption[] }) {
-  if (!tenants.length) {
-    return null;
-  }
-
+function TenantSelectionScreen({ 
+  tenants, 
+  onSelect, 
+  isSelecting 
+}: { 
+  tenants: LoginTenantOption[]; 
+  onSelect: (tenantId: string) => void;
+  isSelecting: boolean;
+}) {
   return (
-    <div className="space-y-3 rounded-xl border border-badge-border bg-badge px-4 py-4">
-      <div className="text-sm font-medium text-foreground">Accessible tenants</div>
-      <div className="space-y-2">
-        {tenants.map((tenant) => (
-          <div
-            key={tenant.tenantId}
-            className="rounded-xl border border-border bg-card px-3 py-3 text-sm"
-          >
-            <div className="font-medium text-foreground">{tenant.name}</div>
-            <div className="mt-1 text-text-secondary">
-              {tenant.role} | {tenant.slug} | {tenant.status}
-            </div>
-          </div>
-        ))}
-      </div>
+    <div className="space-y-4">
+      <AuthCard
+        title="Select your workspace"
+        description="Your account has access to multiple clinic environments. Please select the one you want to sign into."
+      >
+        <div className="space-y-2 mt-4">
+          {tenants.map((tenant) => (
+            <button
+              key={tenant.tenantId}
+              disabled={isSelecting}
+              onClick={() => onSelect(tenant.tenantId)}
+              className="flex w-full items-center justify-between rounded-xl border border-border bg-card p-4 text-left shadow-sm transition-all hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50"
+            >
+              <div>
+                <div className="font-semibold text-foreground">{tenant.name}</div>
+                <div className="mt-1 text-sm text-text-secondary">
+                  Role: {tenant.role.toLowerCase()} &bull; {tenant.slug}
+                </div>
+              </div>
+              <ArrowRight className="text-muted-foreground" size={16} />
+            </button>
+          ))}
+        </div>
+      </AuthCard>
     </div>
   );
 }
@@ -223,7 +238,6 @@ function LoginPanel({
           </div>
         )}
 
-        <TenantList tenants={tenantOptions} />
       </AuthCard>
     </div>
   );
@@ -235,6 +249,7 @@ export function LoginForm() {
   const [activeFlow, setActiveFlow] = useState<ActiveFlow>(() =>
     createInitialFlow(searchParams),
   );
+  const queryClient = useQueryClient();
   const [email, setEmail] = useState(searchParams.get("email") ?? "");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -297,15 +312,23 @@ export function LoginForm() {
       });
 
       if ("requiresTenantSelection" in result) {
-        setSubmitError(
-          "Multiple tenants are available for this account. Tenant selection is not exposed in this flow yet.",
-        );
         setTenantOptions(result.tenants);
-        triggerErrorState();
+        setActiveFlow("selectTenant");
         return;
       }
 
-      router.replace(resolvePostAuthRoute(result));
+      // Valid single-tenant login
+      const session = await queryClient.fetchQuery({
+        queryKey: ["auth", "session"],
+        queryFn: getAuthSession,
+      });
+      const route = resolvePostAuthRoute(session);
+
+      if (globalThis?.window) {
+        window.location.href = route;
+      } else {
+        router.replace(route);
+      }
     } catch (error) {
       if (error instanceof ApiClientError) {
         if (error.status === 401) {
@@ -329,6 +352,36 @@ export function LoginForm() {
     return (
       <AuthLayout fullWidth>
         <OnboardingWizard onBackToLogin={() => setActiveFlow("login")} />
+      </AuthLayout>
+    );
+  }
+
+  // Handle Multi-Tenant selection flow
+  if (activeFlow === "selectTenant") {
+    return (
+      <AuthLayout>
+        <TenantSelectionScreen
+          tenants={tenantOptions}
+          isSelecting={isSubmitting}
+          onSelect={async (tenantId) => {
+            setIsSubmitting(true);
+            try {
+              const response = await selectTenant(tenantId);
+              const session = await queryClient.fetchQuery({
+                queryKey: ["auth", "session"],
+                queryFn: getAuthSession,
+              });
+              if (globalThis?.window) {
+                window.location.href = resolvePostAuthRoute(session);
+              }
+            } catch (err) {
+              setSubmitError("Network error or invalid tenant.");
+              setActiveFlow("login");
+            } finally {
+              setIsSubmitting(false);
+            }
+          }}
+        />
       </AuthLayout>
     );
   }

@@ -79,7 +79,10 @@ export async function sendDoctorInviteEmail(
   input: DoctorInviteEmailInput,
 ): Promise<void> {
   if (!resend) {
-    throw new Error("RESEND_API_KEY_MISSING");
+    console.warn(
+      `\n⚠️ RESEND_API_KEY IS MISSING. Email not sent.\n🔗 Local Invite Link for ${input.doctorName}:\n${buildInviteAcceptUrl(input.acceptToken)}\n`
+    );
+    return;
   }
 
   const from = process.env.RESEND_FROM_EMAIL ?? process.env.RESEND_FROM;

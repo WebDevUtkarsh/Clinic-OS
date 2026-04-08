@@ -13,6 +13,7 @@ export type NavigationItem = {
   href: string;
   label: string;
   icon: LucideIcon;
+  permission?: string;
 };
 
 export type FacilityOption = {
@@ -29,17 +30,17 @@ export const navigationSections: Array<{
     label: "MAIN",
     items: [
       { href: "dashboard", label: "Dashboard", icon: LayoutGrid },
-      { href: "patients", label: "Patients", icon: Users },
-      { href: "doctors", label: "Doctors", icon: Stethoscope },
-      { href: "appointments", label: "Appointments", icon: CalendarDays },
-      { href: "billing", label: "Billing", icon: Receipt },
+      { href: "patients", label: "Patients", icon: Users, permission: "patients:read" },
+      { href: "doctors", label: "Doctors", icon: Stethoscope, permission: "doctors:read" },
+      { href: "appointments", label: "Appointments", icon: CalendarDays, permission: "appointments:read" },
+      { href: "billing", label: "Billing", icon: Receipt, permission: "billing:read" },
     ],
   },
   {
     label: "ANALYTICS",
     items: [
-      { href: "reports", label: "Reports", icon: BarChart3 },
-      { href: "audit", label: "Audit / Security", icon: Shield },
+      { href: "reports", label: "Reports", icon: BarChart3, permission: "reports:read" },
+      { href: "audit", label: "Audit / Security", icon: Shield, permission: "audit:read" },
     ],
   },
 ] as const;
@@ -64,7 +65,8 @@ export function getFacilitySubtitle(
   return facility.organizationName;
 }
 
-export function getInitials(name: string) {
+export function getInitials(name?: string) {
+  if (!name) return "";
   return name
     .split(" ")
     .filter(Boolean)
@@ -73,7 +75,8 @@ export function getInitials(name: string) {
     .join("");
 }
 
-export function getRoleBadgeClasses(role: string) {
+export function getRoleBadgeClasses(role?: string) {
+  if (!role) return "border-gray-500/20 bg-gray-500/10 text-gray-500";
   const normalizedRole = role.toLowerCase();
 
   if (normalizedRole.includes("doctor")) {

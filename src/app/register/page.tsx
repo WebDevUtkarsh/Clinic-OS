@@ -17,15 +17,16 @@ import { AuthShell } from "@/components/auth/auth-shell";
 import { SessionLoader } from "@/components/auth/session-loader";
 import {
   ApiError,
+  loginWithPassword,
   registerTenant,
   resolvePostAuthRoute,
 } from "@/lib/frontend/auth-client";
 import { useAuthSession } from "@/hooks/use-auth-session";
+import { useQueryClient } from "@tanstack/react-query";
 
 type RegisterFormState = {
   name: string;
   email: string;
-  tenantName: string;
   password: string;
   confirmPassword: string;
 };
@@ -33,13 +34,13 @@ type RegisterFormState = {
 const initialForm: RegisterFormState = {
   name: "",
   email: "",
-  tenantName: "",
   password: "",
   confirmPassword: "",
 };
 
 export default function RegisterPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const auth = useAuthSession({ requireAuth: false });
   const [form, setForm] = useState(initialForm);
   const [error, setError] = useState<string | null>(null);
@@ -88,18 +89,33 @@ export default function RegisterPage() {
     setIsSubmitting(true);
 
     try {
+      const tenantName = `${form.name.trim()} Workspace`;
+
       await registerTenant({
         name: form.name.trim(),
         email: form.email.trim().toLowerCase(),
         password: form.password,
-        tenantName: form.tenantName.trim(),
+        tenantName,
       });
 
-      router.push(
-        `/login?registered=1&email=${encodeURIComponent(
-          form.email.trim().toLowerCase(),
-        )}`,
-      );
+      try {
+        await loginWithPassword({
+          email: form.email.trim().toLowerCase(),
+          password: form.password,
+        });
+        
+        await queryClient.invalidateQueries({
+          queryKey: ["auth", "session"],
+        });
+
+        router.replace("/onboarding");
+      } catch (loginError) {
+        router.push(
+          `/login?registered=1&email=${encodeURIComponent(
+            form.email.trim().toLowerCase(),
+          )}`,
+        );
+      }
     } catch (submissionError) {
       if (submissionError instanceof ApiError) {
         setError(submissionError.message || "Registration failed.");
@@ -200,22 +216,6 @@ export default function RegisterPage() {
                 value={form.email}
                 onChange={(event) => handleChange("email", event.target.value)}
                 placeholder="owner@clinic.example"
-                className="w-full bg-transparent text-sm outline-hidden placeholder:text-white/18"
-              />
-            </div>
-          </label>
-
-          <label className="block">
-            <span className="mb-2 block text-[11px] font-bold uppercase tracking-[0.22em] text-white/38">
-              Tenant name
-            </span>
-            <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/30 px-4 py-4">
-              <Building2 size={16} className="text-white/25" />
-              <input
-                required
-                value={form.tenantName}
-                onChange={(event) => handleChange("tenantName", event.target.value)}
-                placeholder="Sunrise Health"
                 className="w-full bg-transparent text-sm outline-hidden placeholder:text-white/18"
               />
             </div>

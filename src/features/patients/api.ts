@@ -1,49 +1,120 @@
-import { useQuery } from "@tanstack/react-query";
-import { z } from "zod";
-import { apiRequest, requireFacilityId } from "@/lib/api/client";
-import { queryKeys } from "@/lib/query/query-keys";
+import { apiClient } from "@/lib/api/client";
+import { type Patient, type CreatePatientPayload, type UpdatePatientPayload, type ApiResponse } from "./types";
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
+import { useFacility } from "@/features/auth/components/FacilityProvider";
+import { patientKeys } from "./query-keys";
 
-const patientSchema = z.object({
-  id: z.string(),
-  facilityId: z.string(),
-  name: z.string(),
-  gender: z.enum(["Male", "Female", "Other"]),
-  dob: z.string().nullable().optional(),
-  phone: z.string().nullable().optional(),
-  email: z.string().nullable().optional(),
-  address: z.string().nullable().optional(),
-  isDeleted: z.boolean().optional(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
-});
+// ─────────────────────────────────────────────
+// Queries
+// ─────────────────────────────────────────────
 
-const patientsResponseSchema = z.object({
-  success: z.literal(true),
-  data: z.array(patientSchema),
-  nextCursor: z.string().nullable(),
-});
-
-export async function getPatients(input: {
-  facilityId: string;
-  search?: string;
-}) {
-  const facilityId = requireFacilityId(input.facilityId);
-  const response = await apiRequest("/api/patients", {
-    facilityId,
-    query: {
-      search: input.search?.trim() || undefined,
-      limit: 20,
+export function usePatients(params?: { search?: string; limit?: number }) {
+  const { facilityId } = useFacility();
+  return useInfiniteQuery({
+    queryKey: patientKeys.list(facilityId ?? null, params?.search),
+    queryFn: async ({ pageParam = "" }) => {
+      const response = await apiClient.get<ApiResponse<Patient[]>>("/patients", {
+        params: {
+          cursor: pageParam || undefined,
+          limit: params?.limit || 20,
+          search: params?.search || undefined,
+        },
+      });
+      return response.data;
     },
-    schema: patientsResponseSchema,
+    initialPageParam: "",
+    getNextPageParam: (lastPage) => lastPage.nextCursor || undefined,
+    enabled: !!facilityId,
   });
-
-  return response;
 }
 
-export function usePatientsQuery(facilityId: string, search: string) {
+export function usePatient(id: string) {
+  const { facilityId } = useFacility();
   return useQuery({
-    queryKey: queryKeys.patients.list(facilityId, search),
-    queryFn: () => getPatients({ facilityId, search }),
-    enabled: Boolean(facilityId),
+    queryKey: patientKeys.detail(facilityId ?? null, id),
+    queryFn: async () => {
+      const response = await apiClient.get<ApiResponse<Patient>>(`/patients/${id}`);
+      return response.data.data;
+    },
+    enabled: !!facilityId && !!id,
+  });
+}
+
+// ─────────────────────────────────────────────
+// Mutations — all use patientKeys.all for broad,
+// filter-safe invalidation so every list/detail
+// query refreshes regardless of search/pagination.
+// ─────────────────────────────────────────────
+
+export function useCreatePatient() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: CreatePatientPayload) => {
+      const response = await apiClient.post<ApiResponse<Patient>>("/patients", payload);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: patientKeys.all });
+    },
+  });
+}
+
+export function useUpdatePatient() {
+  const queryClient = useQueryClient();
+  const { facilityId } = useFacility();
+
+  return useMutation({
+    mutationFn: async ({ id, payload }: { id: string; payload: UpdatePatientPayload }) => {
+      const response = await apiClient.patch<ApiResponse<Patient>>(`/patients/${id}`, payload);
+      return response.data;
+    },
+    onSuccess: (response, variables) => {
+      // Update detail cache immediately with returned data
+      if (facilityId && response.data) {
+        queryClient.setQueryData(
+          patientKeys.detail(facilityId, variables.id),
+          response.data,
+        );
+      }
+      // Broad invalidation — refreshes ALL patient lists regardless of filters
+      queryClient.invalidateQueries({ queryKey: patientKeys.all });
+    },
+  });
+}
+
+export function useDeletePatient() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await apiClient.delete<ApiResponse<null>>(`/patients/${id}`);
+      return response.data;
+    },
+    onMutate: async () => {
+      // Cancel in-flight queries to prevent stale overwrites
+      await queryClient.cancelQueries({ queryKey: patientKeys.all });
+    },
+    onSettled: () => {
+      // Always refetch after success OR error to stay in sync
+      queryClient.invalidateQueries({ queryKey: patientKeys.all });
+    },
+  });
+}
+
+export function useBulkDeletePatients() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      const response = await apiClient.post<ApiResponse<null>>("/patients/bulk-delete", { ids });
+      return response.data;
+    },
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: patientKeys.all });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: patientKeys.all });
+    },
   });
 }

@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { Prisma, PrismaClient } from "@/generated/tenant/client";
+import { Prisma, PrismaClient, type FacilityType } from "@/generated/tenant/client";
 import type { CreateDoctorInput } from "@/lib/backend/doctors/schemas";
 import type {
   DoctorFacilityResponse,
@@ -245,7 +245,7 @@ export function serializeDoctor(
         id: string;
         organizationId: string;
         name: string;
-        type: DoctorFacilityResponse["facility"]["type"];
+        type: FacilityType;
       };
     }>;
   },
@@ -319,7 +319,7 @@ export function serializeDoctorListItem(
         id: string;
         organizationId: string;
         name: string;
-        type: DoctorFacilityResponse["facility"]["type"];
+        type: FacilityType;
       };
     }>;
   },
@@ -328,7 +328,7 @@ export function serializeDoctorListItem(
   const serialized = serializeDoctor(doctor);
   const currentFacility =
     serialized.facilities.find(
-      (facility) => facility.facilityId === currentFacilityId,
+      (facility) => facility.id === currentFacilityId,
     ) ?? null;
 
   return {
@@ -350,24 +350,20 @@ function serializeDoctorFacility(facility: {
     id: string;
     organizationId: string;
     name: string;
-    type: DoctorFacilityResponse["facility"]["type"];
+    type: FacilityType;
   };
 }): DoctorFacilityResponse {
   return {
-    id: facility.id,
-    facilityId: facility.facilityId,
+    id: facility.facility.id,
+    name: facility.facility.name,
+    type: facility.facility.type,
     organizationId: facility.organizationId,
+    mappingId: facility.id,
     consultationFee: facility.consultationFee,
     consultationDuration: facility.consultationDuration,
     consultationStartTime: facility.consultationStartTime,
     consultationEndTime: facility.consultationEndTime,
     createdAt: facility.createdAt.toISOString(),
-    facility: {
-      id: facility.facility.id,
-      organizationId: facility.facility.organizationId,
-      name: facility.facility.name,
-      type: facility.facility.type,
-    },
   };
 }
 

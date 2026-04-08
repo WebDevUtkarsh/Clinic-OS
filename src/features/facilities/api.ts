@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { apiRequest } from "@/lib/api/client";
+import { apiClient } from "@/lib/api/client";
 
 const organizationSchema = z.object({
   id: z.string(),
@@ -7,16 +7,8 @@ const organizationSchema = z.object({
 });
 
 export async function createOrganization(input: { name: string }) {
-  const response = await apiRequest("/api/organizations", {
-    method: "POST",
-    body: input,
-    schema: z.object({
-      success: z.literal(true),
-      data: organizationSchema,
-    }),
-  });
-
-  return response.data;
+  const response = await apiClient.post("/organizations", input);
+  return response.data.data;
 }
 
 export async function createFacility(input: {
@@ -25,20 +17,25 @@ export async function createFacility(input: {
   type: "CLINIC" | "HOSPITAL" | "DIAGNOSTIC" | "PHARMACY";
   address?: string;
 }) {
-  const response = await apiRequest("/api/facilities", {
-    method: "POST",
-    body: input,
-    schema: z.object({
-      success: z.literal(true),
-      data: z.object({
-        id: z.string(),
-        organizationId: z.string(),
-        name: z.string(),
-        type: z.enum(["CLINIC", "HOSPITAL", "DIAGNOSTIC", "PHARMACY"]),
-        address: z.string().nullable(),
-      }),
-    }),
-  });
+  const response = await apiClient.post("/facilities", input);
+  return response.data.data;
+}
+import { useQuery } from "@tanstack/react-query";
 
-  return response.data;
+export type Facility = {
+  id: string;
+  organizationId: string;
+  name: string;
+  type: "CLINIC" | "HOSPITAL" | "DIAGNOSTIC" | "PHARMACY";
+  address: string | null;
+};
+
+export function useFacilities() {
+  return useQuery({
+    queryKey: ["facilities", "list"],
+    queryFn: async () => {
+      const response = await apiClient.get<{ success: boolean; data: Facility[] }>("/facilities");
+      return response.data.data;
+    },
+  });
 }

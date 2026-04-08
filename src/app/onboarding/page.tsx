@@ -79,7 +79,8 @@ export default async function OnboardingPage() {
   }
 
   if (!session.requiresOrganizationSetup && !session.requiresFacilitySetup) {
-    redirect(resolvePostAuthRoute(session));
+    const facilityId = session.accessibleFacilityIds[0];
+    redirect(`/f/${facilityId}/dashboard`);
   }
 
   return <OnboardingWorkflow session={session} />;

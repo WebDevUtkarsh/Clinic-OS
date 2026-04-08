@@ -2,19 +2,15 @@ import type { FacilityType } from "@/generated/tenant/enums";
 
 export type DoctorFacilityResponse = {
   id: string;
-  facilityId: string;
+  name: string;
+  type: FacilityType;
   organizationId: string;
+  mappingId: string;
   consultationFee: number | null;
   consultationDuration: number | null;
   consultationStartTime: string | null;
   consultationEndTime: string | null;
   createdAt: string;
-  facility: {
-    id: string;
-    organizationId: string;
-    name: string;
-    type: FacilityType;
-  };
 };
 
 export type DoctorResponse = {

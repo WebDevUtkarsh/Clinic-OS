@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { apiRequest } from "@/lib/api/client";
+import { apiClient } from "@/lib/api/client";
 import type {
   LoginResponse,
   RegisterResponse,
@@ -50,10 +50,8 @@ export async function loginWithPassword(input: {
   email: string;
   password: string;
 }) {
-  return (await apiRequest("/api/auth/login", {
-    method: "POST",
-    body: input,
-  })) as LoginResponse;
+  const res = await apiClient.post<LoginResponse>("/auth/login", input);
+  return res.data;
 }
 
 export async function registerTenant(input: {
@@ -62,23 +60,24 @@ export async function registerTenant(input: {
   password: string;
   tenantName: string;
 }) {
-  return (await apiRequest("/api/auth/register", {
-    method: "POST",
-    body: input,
-    schema: registerResponseSchema,
-  })) as RegisterResponse;
+  const res = await apiClient.post("/auth/register", input);
+  const parsed = registerResponseSchema.parse(res.data);
+  return parsed as RegisterResponse;
 }
 
 export async function getAuthSession() {
-  const response = await apiRequest("/api/auth/me", {
-    schema: getSessionResponseSchema,
-  });
+  const res = await apiClient.get("/auth/me");
+  const parsed = getSessionResponseSchema.parse(res.data);
 
-  return response.data as SessionData;
+  return parsed.data as SessionData;
 }
 
 export async function logoutSession() {
-  return apiRequest("/api/auth/logout", {
-    method: "POST",
-  });
+  const res = await apiClient.post("/auth/logout");
+  return res.data;
+}
+
+export async function selectTenant(tenantId: string) {
+  const res = await apiClient.post("/auth/tenant/select", { tenantId });
+  return res.data;
 }
