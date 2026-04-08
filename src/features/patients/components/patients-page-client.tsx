@@ -91,7 +91,7 @@ export function PatientsPageClient({ facilityId }: { facilityId: string }) {
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 bg-white dark:bg-[#111827] border border-gray-200 dark:border-white/[0.08] rounded-xl flex flex-col overflow-hidden animate-dashboard-fade-up shadow-xs">
+      <div className="flex-1 min-h-0 bg-white dark:bg-[#111827] border border-gray-200 dark:border-white/8 rounded-xl flex flex-col overflow-hidden animate-dashboard-fade-up shadow-xs">
         <PatientsTable
           data={flatData}
           rowSelection={selectedRowIds}

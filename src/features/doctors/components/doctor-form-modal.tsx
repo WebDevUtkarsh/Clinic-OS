@@ -196,7 +196,7 @@ export function DoctorFormModal({ isOpen, onClose, doctorToEdit, facilityId }: D
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div 
-        className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-white/[0.08] w-full max-w-2xl rounded-2xl shadow-2xl p-6 relative flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200"
+        className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-white/8 w-full max-w-2xl rounded-2xl shadow-2xl p-6 relative flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         <button 
@@ -226,7 +226,7 @@ export function DoctorFormModal({ isOpen, onClose, doctorToEdit, facilityId }: D
                 <select 
                   value={formData.salutation || ""}
                   onChange={(e) => setFormData(p => ({ ...p, salutation: e.target.value }))}
-                  className="w-full rounded-xl border border-gray-200 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-white/[0.08]"
+                  className="w-full rounded-xl border border-gray-200 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-white/8"
                 >
                   <option value="Dr.">Dr.</option>
                   <option value="Mr.">Mr.</option>
@@ -324,7 +324,7 @@ export function DoctorFormModal({ isOpen, onClose, doctorToEdit, facilityId }: D
                 <div className="flex items-center justify-between">
                     <h3 className="text-sm font-medium text-blue-500 uppercase tracking-wider">Facility Assignments</h3>
                     <select 
-                        className="text-xs rounded-lg border border-gray-200 bg-transparent px-2 py-1 outline-none dark:border-white/[0.08]"
+                        className="text-xs rounded-lg border border-gray-200 bg-transparent px-2 py-1 outline-none dark:border-white/8"
                         onChange={(e) => {
                             if (e.target.value) addFacility(e.target.value);
                             e.target.value = "";
@@ -344,7 +344,7 @@ export function DoctorFormModal({ isOpen, onClose, doctorToEdit, facilityId }: D
                     {formData.facilities.map((fSetting, idx) => {
                         const facility = allFacilities?.find(x => x.id === fSetting.facilityId);
                         return (
-                            <div key={fSetting.facilityId} className="p-4 rounded-xl border border-gray-100 bg-gray-50/50 dark:border-white/[0.04] dark:bg-white/[0.02]">
+                            <div key={fSetting.facilityId} className="p-4 rounded-xl border border-gray-100 bg-gray-50/50 dark:border-white/4 dark:bg-white/2">
                                 <div className="flex items-center justify-between mb-3">
                                     <span className="text-sm font-semibold">{facility?.name || "Loading..."}</span>
                                     {formData.facilities.length > 1 && (
@@ -384,7 +384,7 @@ export function DoctorFormModal({ isOpen, onClose, doctorToEdit, facilityId }: D
             </div>
           )}
 
-          <div className="pt-4 flex justify-end gap-3 border-t border-gray-100 dark:border-white/[0.06] mt-6">
+          <div className="pt-4 flex justify-end gap-3 border-t border-gray-100 dark:border-white/6 mt-6">
             <Button type="button" variant="ghost" onClick={onClose} disabled={isPending}>
               Cancel
             </Button>

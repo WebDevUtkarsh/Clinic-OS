@@ -163,7 +163,7 @@ export default function RegisterPage() {
           ].map((item) => (
             <div
               key={item.label}
-              className="rounded-3xl border border-white/10 bg-white/[0.04] p-5"
+              className="rounded-3xl border border-white/10 bg-white/4 p-5"
             >
               <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-500/12 text-indigo-300">
                 <item.icon size={18} />
@@ -175,7 +175,7 @@ export default function RegisterPage() {
         </div>
       }
     >
-      <div className="rounded-[2rem] border border-white/10 bg-[#09090B]/95 p-8 shadow-[0_0_100px_rgba(79,70,229,0.16)] backdrop-blur-xl md:p-10">
+      <div className="rounded-4xl border border-white/10 bg-[#09090B]/95 p-8 shadow-[0_0_100px_rgba(79,70,229,0.16)] backdrop-blur-xl md:p-10">
         <div className="mb-8">
           <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/25 bg-indigo-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-indigo-300">
             <Sparkles size={12} />
@@ -259,7 +259,7 @@ export default function RegisterPage() {
             </label>
           </div>
 
-          <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-white/45">
+          <div className="rounded-2xl border border-white/8 bg-white/3 px-4 py-3 text-sm text-white/45">
             {passwordHint}
           </div>
 

@@ -120,12 +120,12 @@ export function DoctorsTable({
         id: "facilities",
         header: "Facilities",
         cell: ({ row }) => (
-          <div className="flex flex-wrap gap-1 max-w-[200px]">
+          <div className="flex flex-wrap gap-1 max-w-50">
             {row.original.facilities?.length > 0 ? (
               row.original.facilities.map((f) => (
                 <span
                   key={f.id}
-                  className="inline-flex items-center rounded-md border border-gray-200 bg-gray-50 px-2 py-0.5 text-[11px] font-medium text-gray-600 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-[#9CA3AF] truncate max-w-[120px]"
+                  className="inline-flex items-center rounded-md border border-gray-200 bg-gray-50 px-2 py-0.5 text-[11px] font-medium text-gray-600 dark:border-white/8 dark:bg-white/4 dark:text-[#9CA3AF] truncate max-w-30"
                   title={f.name}
                 >
                   {f.name}
@@ -160,7 +160,7 @@ export function DoctorsTable({
               <button
                 type="button"
                 onClick={() => onEdit(doctor)}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/[0.04] dark:hover:text-[#F9FAFB]"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/4 dark:hover:text-[#F9FAFB]"
                 title="Edit"
               >
                 <Pencil className="h-3.5 w-3.5" />
@@ -209,7 +209,7 @@ export function DoctorsTable({
     return (
       <div className="flex-1 p-6 space-y-3">
         {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="h-12 rounded-xl bg-gray-100 dark:bg-white/[0.04] animate-pulse" />
+          <div key={i} className="h-12 rounded-xl bg-gray-100 dark:bg-white/4 animate-pulse" />
         ))}
       </div>
     );
@@ -230,7 +230,7 @@ export function DoctorsTable({
   return (
     <div className="flex-1 overflow-auto">
       <table className="w-full">
-        <thead className="sticky top-0 z-10 border-b border-gray-200 bg-gray-50 dark:border-white/[0.06] dark:bg-[#0B0F14]">
+        <thead className="sticky top-0 z-10 border-b border-gray-200 bg-gray-50 dark:border-white/6 dark:bg-[#0B0F14]">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
@@ -245,11 +245,11 @@ export function DoctorsTable({
             </tr>
           ))}
         </thead>
-        <tbody className="divide-y divide-gray-100 dark:divide-white/[0.04]">
+        <tbody className="divide-y divide-gray-100 dark:divide-white/4">
           {table.getRowModel().rows.map((row) => (
             <tr
               key={row.id}
-              className="transition-colors hover:bg-gray-50/50 dark:hover:bg-white/[0.02]"
+              className="transition-colors hover:bg-gray-50/50 dark:hover:bg-white/2"
             >
               {row.getVisibleCells().map((cell) => (
                 <td key={cell.id} className="whitespace-nowrap px-4 py-3 text-sm">

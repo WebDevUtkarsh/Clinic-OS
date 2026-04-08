@@ -115,7 +115,7 @@ export function PatientFormModal({ isOpen, onClose, patientToEdit }: PatientForm
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div 
-        className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-white/[0.08] w-full max-w-lg rounded-2xl shadow-2xl p-6 relative flex flex-col max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200"
+        className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-white/8 w-full max-w-lg rounded-2xl shadow-2xl p-6 relative flex flex-col max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         <button 

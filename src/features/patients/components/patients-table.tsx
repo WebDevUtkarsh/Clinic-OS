@@ -47,7 +47,7 @@ export function PatientsTable({
         header: ({ table }) => (
           <input
             type="checkbox"
-            className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary dark:border-white/[0.2] dark:bg-[#1f2937]"
+            className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary dark:border-white/20 dark:bg-[#1f2937]"
             checked={table.getIsAllPageRowsSelected()}
             ref={(input) => {
               if (input) {
@@ -60,7 +60,7 @@ export function PatientsTable({
         cell: ({ row }) => (
           <input
             type="checkbox"
-            className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary dark:border-white/[0.2] dark:bg-[#1f2937]"
+            className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary dark:border-white/20 dark:bg-[#1f2937]"
             checked={row.getIsSelected()}
             disabled={!row.getCanSelect()}
             onChange={row.getToggleSelectedHandler()}
@@ -81,7 +81,7 @@ export function PatientsTable({
       }),
       columnHelper.accessor("email", {
         header: "Email",
-        cell: (info) => <div className="text-muted-foreground truncate max-w-[200px]">{info.getValue() || "N/A"}</div>,
+        cell: (info) => <div className="text-muted-foreground truncate max-w-50">{info.getValue() || "N/A"}</div>,
       }),
       columnHelper.accessor("gender", {
         header: "Gender",
@@ -144,8 +144,8 @@ export function PatientsTable({
   return (
     <div className="flex flex-col flex-1 min-h-0">
       <div className="flex-1 overflow-auto overflow-x-auto">
-        <table className="w-full text-sm text-left border-collapse min-w-[700px]">
-          <thead className="text-xs uppercase bg-gray-50 dark:bg-white/[0.02] border-b border-border sticky top-0 z-10 transition-colors">
+        <table className="w-full text-sm text-left border-collapse min-w-175">
+          <thead className="text-xs uppercase bg-gray-50 dark:bg-white/2 border-b border-border sticky top-0 z-10 transition-colors">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (

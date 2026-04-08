@@ -14,10 +14,10 @@ export default function PatientsLoading() {
           <Skeleton className="h-10 w-32" />
         </div>
 
-        <div className="rounded-md border border-white/[0.06] flex-1 overflow-hidden">
-          <div className="h-12 bg-gray-50 dark:bg-white/[0.02] border-b border-gray-200 dark:border-white/[0.06]" />
+        <div className="rounded-md border border-white/6 flex-1 overflow-hidden">
+          <div className="h-12 bg-gray-50 dark:bg-white/2 border-b border-gray-200 dark:border-white/6" />
           {[1,2,3,4,5,6].map(i => (
-            <div key={i} className="flex h-16 items-center px-4 border-b border-gray-200 dark:border-white/[0.04]">
+            <div key={i} className="flex h-16 items-center px-4 border-b border-gray-200 dark:border-white/4">
               <Skeleton className="h-4 w-4 rounded mr-4" />
               <div className="flex-1 flex gap-4">
                 <Skeleton className="h-4 w-1/4" />

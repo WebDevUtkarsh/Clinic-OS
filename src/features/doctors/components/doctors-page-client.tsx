@@ -71,7 +71,7 @@ export function DoctorsPageClient({ facilityId }: { facilityId: string }) {
               setSearchTerm(e.target.value);
               setPage(1);
             }}
-            className="w-full sm:w-[340px]"
+            className="w-full sm:w-85"
           />
         </div>
 
@@ -85,7 +85,7 @@ export function DoctorsPageClient({ facilityId }: { facilityId: string }) {
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 bg-white dark:bg-[#111827] border border-gray-200 dark:border-white/[0.08] rounded-xl flex flex-col overflow-hidden animate-dashboard-fade-up shadow-xs">
+      <div className="flex-1 min-h-0 bg-white dark:bg-[#111827] border border-gray-200 dark:border-white/8 rounded-xl flex flex-col overflow-hidden animate-dashboard-fade-up shadow-xs">
         <DoctorsTable
           data={doctors}
           rowSelection={selectedRowIds}
@@ -98,7 +98,7 @@ export function DoctorsPageClient({ facilityId }: { facilityId: string }) {
 
         {/* Offset Pagination Controls */}
         {pagination && pagination.totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-gray-200 dark:border-white/[0.06] px-4 py-3">
+          <div className="flex items-center justify-between border-t border-gray-200 dark:border-white/6 px-4 py-3">
             <div className="text-xs text-gray-500 dark:text-[#6B7280]">
               Showing {(pagination.page - 1) * pagination.pageSize + 1}–
               {Math.min(pagination.page * pagination.pageSize, pagination.total)} of{" "}
